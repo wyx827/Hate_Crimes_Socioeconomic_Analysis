@@ -60,6 +60,19 @@ ggplot(analysis_data, aes(x = factor(round(gini_index, 2)), y = hate_crimes_per_
   theme_minimal()
 
 #### Basic models ####
+#### Logistic Regression ####
+# Scale hate_crimes_per_100k_splc to be within (0, 1)
+logistic_data <- analysis_data %>%
+  mutate(hate_crimes_scaled = (hate_crimes_per_100k_splc - min(hate_crimes_per_100k_splc)) / 
+           (max(hate_crimes_per_100k_splc) - min(hate_crimes_per_100k_splc)),
+         hate_crimes_scaled = pmin(0.9999, pmax(0.0001, hate_crimes_scaled))) # Adjust to strictly (0, 1)
+
+logistic_reg <- glm(hate_crimes_scaled ~
+                      median_income + unemployment_rate + gini_index, 
+                    data = logistic_data, family = quasibinomial)
+
+# Summary of the model
+summary(logistic_reg)
 
 
 #### Bayesian models ####
