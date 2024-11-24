@@ -1,21 +1,100 @@
 #### Preamble ####
-# Purpose: Conducts exploratory data analysis on Hate Crimes dataset
+# Purpose: Perform exploratory data analysis (EDA) on the cleaned Hate Crimes dataset
 # Author: Yuxuan Wei
-# Date: 13 November 2024
+# Date: 24 November 2024
 # Contact: shaw.wei@mail.utoronto.ca
 # License: MIT
-# Pre-requisites: 04-test_analysis_data.R should have validated the cleaned data
-# Any other information needed? EDA to understand data patterns
+# Pre-requisites: Get the cleaned Hate Crimes dataset
+# Any other information needed? NA
 
 #### Workspace setup ####
-# Load necessary libraries
+library(tidyverse)
 library(ggplot2)
-library(dplyr)
+library(rstanarm)
+library(modelsummary)
 
-#### Exploratory Data Analysis ####
-cleaned_data <- read.csv("data/02-analysis_data/cleaned_hate_crimes.csv")
+#### Read data ####
+analysis_data <- read_csv("data/02-analysis_data/cleaned_hate_crimes.csv")
+colnames(analysis_data)
 
-# Visualize income vs. hate crime incidents
-ggplot(cleaned_data, aes(x = median_household_income, y = hate_crimes)) +
-  geom_point() +
-  labs(title = "Income vs Hate Crimes")
+#### Summary of the data ####
+summary(analysis_data)
+
+#### Visualize distributions ####
+# Histogram of hate crimes per 100k (SPLC)
+ggplot(analysis_data, aes(x = hate_crimes_per_100k_splc)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Hate Crimes per 100k (SPLC)", x = "Hate Crimes per 100k", y = "Count") +
+  theme_minimal()
+
+# Histogram of median household income
+ggplot(analysis_data, aes(x = median_income)) +
+  geom_histogram(binwidth = 5000, fill = "green", color = "black", alpha = 0.7) +
+  labs(title = "Distribution of Median Household Income", x = "Median Household Income ($)", y = "Count") +
+  theme_minimal()
+
+# Scatter plot of hate crimes vs. unemployment rate
+ggplot(analysis_data, aes(x = unemployment_rate, y = hate_crimes_per_100k_splc)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Hate Crimes vs. Unemployment Rate", x = "Unemployment Rate (%)", y = "Hate Crimes per 100k") +
+  theme_minimal()
+
+# Bar plot of average hate crimes by state
+ggplot(analysis_data, aes(x = reorder(state, -avg_hatecrimes_per_100k_fbi), y = avg_hatecrimes_per_100k_fbi)) +
+  geom_bar(stat = "identity", fill = "purple", alpha = 0.7) +
+  labs(title = "Average Hate Crimes per 100k (FBI) by State", x = "State", y = "Hate Crimes per 100k") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#### Relationship between variables ####
+# Scatter plot of median income vs. hate crimes
+ggplot(analysis_data, aes(x = median_income, y = hate_crimes_per_100k_splc)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "Hate Crimes vs. Median Income", x = "Median Income ($)", y = "Hate Crimes per 100k") +
+  theme_minimal()
+
+# Box plot of hate crimes by Gini index
+ggplot(analysis_data, aes(x = factor(round(gini_index, 2)), y = hate_crimes_per_100k_splc)) +
+  geom_boxplot(fill = "orange", alpha = 0.7) +
+  labs(title = "Hate Crimes by Gini Index", x = "Gini Index", y = "Hate Crimes per 100k") +
+  theme_minimal()
+
+#### Basic models ####
+
+
+#### Bayesian models ####
+# Bayesian model setup
+bayesian_model <- analysis_data %>%
+  mutate(non_white_share_scaled = scale(non_white_population_share))
+
+# Model formula
+model_formula <- hate_crimes_per_100k_splc ~ median_income + unemployment_rate + (1 | state)
+
+# Specify priors
+priors <- normal(0, 2.5, autoscale = TRUE)
+
+# Fit Bayesian model
+bayesian_model <- stan_glmer(
+  formula = model_formula,
+  data = bayesian_model,
+  family = gaussian,
+  prior = priors,
+  prior_intercept = priors,
+  seed = 123,
+  cores = 4,
+  adapt_delta = 0.95
+)
+
+# Posterior predictive checks
+pp_check(bayesian_model)
+
+# Summarize Bayesian model
+summary(bayesian_model)
+
+#### Save models ####
+saveRDS(logistic_reg, file = "models/logistic_reg.rds")
+saveRDS(bayesian_model, file = "models/bayesian_model.rds")
+
+#### Completion Message ####
+print("EDA has completed.")
+
