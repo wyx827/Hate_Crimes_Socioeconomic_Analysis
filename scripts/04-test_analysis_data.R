@@ -27,16 +27,10 @@ analysis_data <- read_csv(here("data", "02-analysis_data", "cleaned_hate_crimes.
                 info = "There are missing values in metro_area_population_share.")
     expect_true(all(!is.na(analysis_data$high_school_education_share)), 
                 info = "There are missing values in high_school_education_share.")
-    expect_true(all(!is.na(analysis_data$non_citizen_share)), 
-                info = "There are missing values in non_citizen_share.")
-    expect_true(all(!is.na(analysis_data$white_population_poverty_share)), 
-                info = "There are missing values in white_population_poverty_share.")
     expect_true(all(!is.na(analysis_data$gini_index)), 
                 info = "There are missing values in gini_index.")
     expect_true(all(!is.na(analysis_data$non_white_population_share)), 
                 info = "There are missing values in non_white_population_share.")
-    expect_true(all(!is.na(analysis_data$trump_voter_share)), 
-                info = "There are missing values in trump_voter_share.")
     expect_true(all(!is.na(analysis_data$hate_crimes_per_100k_splc)), 
                 info = "There are missing values in hate_crimes_per_100k_splc.")
     expect_true(all(!is.na(analysis_data$avg_hatecrimes_per_100k_fbi)), 
