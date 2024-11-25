@@ -253,9 +253,57 @@ Let me know if you encounter further issues or need additional guidance!
 
 
 User:
+Error in print.default() : argument "x" is missing, with no default
+In addition: Warning message:
+`aes_string()` was deprecated in ggplot2 3.0.0.
+ℹ Please use tidy evaluation idioms with `aes()`.
+ℹ See also `vignette("ggplot2-in-packages")` for more information.
+This warning is displayed once every 8 hours.
+Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated. 
+> 
 
 ChatGPT:
+Here is the updated script addressing both issues:
 
+aes_string() Deprecation: Replaced with aes() using tidy evaluation.
+print() Error: Updated the loop to ensure proper plot rendering.
+Updated Script:
+r
+Copy code
+# Create scatter plots for each predictor vs hate_crimes_per_100k_splc
+for (predictor in predictors) {
+  plot <- ggplot(analysis_data, aes(x = .data[[predictor]], y = hate_crimes_per_100k_splc)) +
+    geom_point(alpha = 0.7) +
+    labs(
+      title = paste("Relationship Between", predictor, "and Hate Crimes"),
+      x = predictor,
+      y = "Hate Crimes per 100k"
+    ) +
+    theme_minimal()
+  
+  print(plot)  # Display each plot
+}
+
+
+Changes Made:
+Replaced aes_string():
+
+Used aes(x = .data[[predictor]], y = hate_crimes_per_100k_splc) to leverage tidy evaluation with ggplot2.
+.data[[predictor]] allows dynamic column referencing in aes().
+Fixed print() Error:
+
+Created a plot object inside the loop and passed it to print(plot). This ensures proper rendering of each plot in the RStudio Plots pane or an interactive session.
+Visualization Logic:
+
+Plots the relationship between hate_crimes_per_100k_splc and each predictor (e.g., median_income, unemployment_rate, etc.).
+Titles and axis labels dynamically update for each predictor.
+Steps to Run:
+Ensure the arrow package is installed and cleaned_hate_crimes.parquet is available.
+Execute the script to:
+Load the Parquet file.
+Fit the Bayesian hierarchical model.
+Display scatter plots for each predictor.
+Let me know if further refinements are needed!
 
 User:
 
