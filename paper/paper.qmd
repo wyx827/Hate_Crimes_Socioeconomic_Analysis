@@ -1,13 +1,12 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
+title: "Socioeconomic Determinants of Hate Crimes in the United States"
+subtitle: "A Bayesian Hierarchical Analysis"
 author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: [https://github.com/RohanAlexander/starter_folder](https://github.com/RohanAlexander/starter_folder)."
+  - Yuxuan Wei
+thanks: "Code and data are available at: [https://github.com/wyx827/Hate_Crimes_Socioeconomic_Analysis]."
 date: today
 date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+abstract: "This study provides the relationship between socioeconomic factors and hate crimes across U.S. states using a Bayesian hierarchical framework. We analyze a dataset capturing hate crime incidence alongside state-level socioeconomic indicators such as median income, unemployment rates, and income inequality. Results reveal that higher income inequality and unemployment rates are associated with elevated hate crime rates, while higher median income is inversely related. These findings emphasize the need for targeted socioeconomic interventions to mitigate hate crime prevalence."
 format: pdf
 number-sections: true
 bibliography: references.bib
@@ -18,35 +17,43 @@ bibliography: references.bib
 #| warning: false
 #| message: false
 
-library(tidyverse)
-library(palmerpenguins)
+# Library the required packages
+library(dplyr)         
+library(ggplot2)       
+library(rstanarm)      
+library(tidyr)        
+library(arrow)         
+library(readr)          
+
+# Library the cleaned data
+analysis_data <- read_csv(here::here("data/02-analysis_data/cleaned_hate_crimes.csv"))
 ```
 
 
 # Introduction
 
-Overview paragraph
+Hate crimes remain a significant social issue in the United States, threatening community safety and equality. These crimes disproportionately affect marginalized groups and undermine social trust. Existing research identifies socioeconomic factors—such as income inequality, unemployment, and education—as potential contributors to hate crime prevalence. However, most studies overlook state-specific variations in these relationships, limiting the understanding of how regional disparities influence hate crime patterns. This paper uses data sourced from @hatecrimesdata, which provides detailed state-level hate crime statistics alongside socioeconomic indicators, to explore these relationships rigorously.
 
-Estimand paragraph
+This paper investigates the effect of state-level socioeconomic factors on hate crime rates. The estimand is the average marginal effect of variables, including income inequality, unemployment, and education levels, on hate crimes per 100,000 population. A Bayesian hierarchical model is employed to account for regional heterogeneity, allowing for more precise estimation of these effects.
 
-Results paragraph
+The results demonstrate that states with higher income inequality and unemployment rates report more hate crimes, while higher median income and education levels are associated with reduced hate crime prevalence. These findings emphasize the socioeconomic disparities that contribute to hate crime patterns, suggesting the importance of addressing inequality and unemployment at the state level.
 
-Why it matters paragraph
+Understanding the socioeconomic determinants of hate crimes is essential for informing policies aimed at reducing their prevalence. This analysis provides evidence for the role of structural inequality and economic conditions in shaping hate crime patterns, offering a foundation for targeted policy interventions to foster safer and more equitable communities.
 
-Telegraphing paragraph: The remainder of this paper is structured as follows. @sec-data....
-
-
-
-
+The remainder of this paper is structured as follows. @sec-data describes the dataset, variables, and preprocessing steps. Section 3 outlines the methodological framework, including the Bayesian hierarchical model. Section 4 presents the results, accompanied by tables and visualizations. Section 5 discusses the implications, limitations, and potential future directions of the analysis. Section 6 concludes with a summary of the key findings and recommendations.
 
 
 # Data {#sec-data}
 
 ## Overview
 
-We use the statistical programming language R [@citeR].... Our data [@shelter].... Following @tellingstories, we consider...
+We use the statistical programming language R [@citeR], which provides a robust and flexible environment for statistical analysis and modeling. The data manipulation and cleaning tasks in this study are performed using [@tidyverse]. To visualize the variables and their relationships, we employ ggplot2 [@ggplot2], known for its elegant and versatile approach to graphical representation.
 
-Overview text
+The Bayesian hierarchical model is implemented using the rstanarm package [@rstanarm], which facilitates applied Bayesian regression modeling in R. Additionally, the arrow package [@arrow] is used to handle efficient reading and writing of Parquet files, ensuring smooth data processing workflows.
+
+Our dataset is sourced from FiveThirtyEight [@hatecrimesdata], which integrates hate crime statistics with state-level socioeconomic variables, providing a comprehensive basis for the analysis.
+
+
 
 ## Measurement
 	
@@ -232,14 +239,11 @@ posterior_vs_prior(first_model) +
 #| eval: true
 #| message: false
 #| warning: false
-#| label: fig-stanareyouokay
+#| label: fig-
 #| fig-cap: "Checking the convergence of the MCMC algorithm"
 #| fig-subcap: ["Trace plot", "Rhat plot"]
 #| layout-ncol: 2
 
-plot(first_model, "trace")
-
-plot(first_model, "rhat")
 ```
 
 
@@ -248,74 +252,3 @@ plot(first_model, "rhat")
 
 
 # References
-
----
-title: "Analysis of Hate Crime Trends in the United States"
-author: "Yuxuan Wei"
-date: "12 November 2024"
-format: pdf
----
-
-# Abstract
-
-This study analyzes trends in hate crimes across the United States, examining the influence of various socioeconomic factors. Using data from FiveThirtyEight, we model hate crime rates over time to provide insights into the distribution and intensity of hate crimes across regions. Our findings contribute to the understanding of the social dynamics that impact hate crime occurrences, offering actionable insights for policymakers and communities.
-
-# Introduction
-
-Hate crimes are a significant social issue with profound implications for public safety and social cohesion. This paper investigates hate crime trends across the United States and explores the relationship between hate crime rates and socioeconomic variables such as median income, unemployment rates, and population density. By examining these factors, this paper seeks to identify key drivers of hate crimes and assess the predictive power of these variables on hate crime rates.
-
-The structure of this paper is as follows: Section 2 discusses the data and measurement considerations, Section 3 details the modeling approach, Section 4 presents the results, and Section 5 provides a discussion and conclusion.
-
-# Data
-
-## Overview
-
-The primary data source for this analysis is the hate crimes dataset provided by FiveThirtyEight, which contains information on hate crime occurrences, economic indicators, and demographic details for each U.S. state. Key variables include:
-- **Hate Crime Rate**: The number of hate crimes per 100,000 people.
-- **Median Income**: Median household income by state.
-- **Unemployment Rate**: State-level unemployment rate.
-- **Share of Population in Metro Areas**: The proportion of the population living in metropolitan areas.
-
-Data were cleaned and formatted to facilitate analysis, and missing values were addressed using appropriate imputation techniques where necessary.
-
-## Measurement and Limitations
-
-The hate crime rate is measured as the number of reported hate crimes per 100,000 people, which provides a normalized view of hate crime prevalence across states. However, limitations arise due to reporting inconsistencies and potential underreporting, which may impact the accuracy of the data.
-
-# Methodology
-
-## Model Selection
-
-To investigate the impact of socioeconomic factors on hate crime rates, a multiple linear regression model was chosen. This model allows us to quantify the effect of each predictor variable while controlling for other factors. The regression model is defined as follows:
-
-\[
-\text{Hate Crime Rate} = \beta_0 + \beta_1 \text{Median Income} + \beta_2 \text{Unemployment Rate} + \beta_3 \text{Share of Population in Metro} + \epsilon
-\]
-
-where:
-- \(\beta_0\) is the intercept,
-- \(\beta_1\), \(\beta_2\), and \(\beta_3\) are the coefficients for each predictor variable,
-- \(\epsilon\) is the error term.
-
-The model assumptions, including linearity, independence, homoscedasticity, and normality of residuals, were checked and verified using diagnostic plots.
-
-## Alternative Models Considered
-
-Although multiple linear regression was selected, alternative models such as logistic regression and Poisson regression were considered but found unsuitable due to the continuous nature of the outcome variable.
-
-# Results
-
-## Summary Statistics
-
-Table 1 provides descriptive statistics for key variables in the dataset.
-
-```{r}
-# Load necessary libraries and data
-library(tidyverse)
-
-# Display summary statistics
-data <- read.csv("cleaned_hate_crimes.csv")
-summary(data)
-
-
-
