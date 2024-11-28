@@ -47,61 +47,48 @@ The remainder of this paper is structured as follows. @sec-data describes the da
 
 ## Overview
 
-We use the statistical programming language R [@citeR], which provides a robust and flexible environment for statistical analysis and modeling. The data manipulation and cleaning tasks in this study are performed using [@tidyverse]. To visualize the variables and their relationships, we employ ggplot2 [@ggplot2], known for its elegant and versatile approach to graphical representation.
+This study employs R [@citeR] for cleaning and analyzing the dataset, using libraries such as `dplyr` [@tidyverse], `ggplot2` [@ggplot2], and `arrow` [@arrow]. The dataset, sourced from [@hatecrimesdata], explores the relationships between socioeconomic variables and hate crime prevalence in the United States. It includes aggregated data for all 50 states and the District of Columbia.
 
-The Bayesian hierarchical model is implemented using the rstanarm package [@rstanarm], which facilitates applied Bayesian regression modeling in R. Additionally, the arrow package [@arrow] is used to handle efficient reading and writing of Parquet files, ensuring smooth data processing workflows.
+After preprocessing, which involved filtering missing values and standardizing key variables, the final analysis dataset consists of **51** observations across **7** key variables: `state`, `median_income`, `unemployment_rate`, `metro_area_population_share`, `high_school_education_share`, `gini_index`, and `non_white_population_share`. These variables capture essential socioeconomic conditions and their potential influence on hate crime rates, measured as `hate_crimes_per_100k_splc`.
 
-Our dataset is sourced from FiveThirtyEight [@hatecrimesdata], which integrates hate crime statistics with state-level socioeconomic variables, providing a comprehensive basis for the analysis.
+## Measurement and Considerations 
 
+The dataset focuses on measuring the influence of socioeconomic factors on hate crimes. Hate crime data is aggregated from credible sources, including the SPLC and FBI, and represents the prevalence of reported hate crimes per 100,000 residents.
 
+### Data Source and Quality Assurance
 
-## Measurement
-	
-Some paragraphs about how we go from a phenomena in the world to an entry in the dataset.
+The dataset was obtained from FiveThirtyEight[@hatecrimesdata], a trusted source recognized for its rigorous data quality standards. Each state-level observation documents essential socioeconomic and hate crime metrics, including income, unemployment, and population composition.
 
-## Outcome variables
+To ensure comparability across states, socioeconomic indicators were standardized and checked for consistency. Hate crime data, while robust, is subject to underreporting and reporting bias, requiring careful interpretation.
 
-Add graphs, tables and text. Use sub-sub-headings for each outcome variable or update the subheading to be singular.
+### Temporal and Geographic Context
 
+The dataset provides a snapshot of state-level hate crime and socioeconomic data for a single year. While this ensures temporal consistency, it limits the ability to analyze trends over time. Additionally, regional disparities, such as differences in reporting standards or enforcement, may influence observed hate crime rates.
 
+## Variables of Interest
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+The analysis examines the relationships between `hate_crimes_per_100k_splc` (the outcome variable) and the following socioeconomic predictors. Below, we describe each variable and present visualizations to illustrate its distribution and relevance.
 
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+### Outcome Variable: Hate Crimes Per 100k SPLC
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
-  theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
-```
-
-Talk more about it.
-
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+The outcome variable is the number of hate crimes per 100,000 residents, as reported by the SPLC. Its distribution, shown in @fig-hate-crimes, highlights variation across states, with most states reporting between 0.1 and 0.5 hate crimes per 100,000 residents. The variability suggests that some states experience disproportionately higher rates of hate crimes.
 
 ```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
+#| label: fig-hate-crimes
+#| fig-cap: Distribution of Hate Crimes Per 100,000 Residents Across States
 #| echo: false
 #| warning: false
 #| message: false
-
-
+ggplot(analysis_data, aes(x = hate_crimes_per_100k_splc)) +
+  geom_histogram(binwidth = 0.1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(x = "Hate Crimes Per 100,000 Residents",
+       y = "Count of States") +
+  theme_minimal()
 ```
-
-Talk way more about it. 
 
 ## Predictor variables
 
-Add graphs, tables and text.
 
-Use sub-sub-headings for each outcome variable and feel free to combine a few into one if they go together naturally.
 
 
 
@@ -114,7 +101,7 @@ Use sub-sub-headings for each outcome variable and feel free to combine a few in
 
 The goal of our modelling strategy is twofold. Firstly,...
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
+Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model].
 
 ## Model set-up
 
@@ -149,10 +136,7 @@ Our results are summarized in @tbl-modelresults.
 #| warning: false
 #| message: false
 
-library(rstanarm)
 
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
 ```
 
 ```{r}
@@ -162,13 +146,7 @@ first_model <-
 #| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
 #| warning: false
 
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
+
 ```
 
 
@@ -212,15 +190,6 @@ In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. Th
 #| fig-cap: "Examining how the model fits, and is affected by, the data"
 #| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
-  theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
 ```
 
 ## Diagnostics
