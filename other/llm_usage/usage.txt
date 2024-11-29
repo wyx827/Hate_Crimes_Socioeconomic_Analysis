@@ -604,20 +604,608 @@ Copy code
 
 
 User:
+how to change the position of these labels? "label = paste(
+      "Mean: ", round(mean(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%",
+      "\nMedian: ", round(median(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%",
+      "\nSD: ", round(sd(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%""
 
 ChatGPT:
+To adjust the position of the labels in your annotate() function, you can modify the x and y coordinates passed to the annotate() function. Here's how you can dynamically position the labels based on the data:
+
+Updated Code with Dynamic Label Positioning
+R
+Copy code
+ggplot(analysis_data %>% filter(unemployment_rate >= 0 & unemployment_rate <= 10), 
+       aes(x = unemployment_rate)) +
+  # Histogram with appropriate binwidth
+  geom_histogram(
+    binwidth = 0.5, 
+    fill = "#2ecc71", 
+    color = "#27ae60", 
+    alpha = 0.7
+  ) +
+  # Density plot scaled to match histogram counts
+  geom_density(
+    aes(y = after_stat(density * nrow(analysis_data) * 0.5)), 
+    color = "#2c3e50", 
+    fill = "#2980b9", 
+    alpha = 0.2
+  ) +
+  # Vertical lines for mean and median
+  geom_vline(
+    xintercept = c(mean(analysis_data$unemployment_rate, na.rm = TRUE), 
+                   median(analysis_data$unemployment_rate, na.rm = TRUE)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "blue")
+  ) +
+  # Annotating statistical summary at a clearer location
+  annotate(
+    "text", 
+    x = mean(analysis_data$unemployment_rate, na.rm = TRUE) + 1,  # Adjust x position
+    y = max(table(cut(analysis_data$unemployment_rate, breaks = 20))) * 0.8,  # Adjust y position
+    label = paste(
+      "Mean: ", round(mean(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%",
+      "\nMedian: ", round(median(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%",
+      "\nSD: ", round(sd(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%"
+    ),
+    hjust = 0,  # Adjust horizontal alignment
+    vjust = 0,  # Adjust vertical alignment
+    color = "black",
+    size = 5
+  ) +
+  # Labels and title
+  labs(
+    title = "Distribution of Unemployment Rates",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Unemployment Rate (%)",
+    y = "Count of States"
+  ) +
+  # Minimal theme for clarity
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+Key Adjustments:
+x Position:
+
+Adjust the x-coordinate dynamically using:
+R
+Copy code
+x = mean(analysis_data$unemployment_rate, na.rm = TRUE) + 1
+This ensures the label is slightly offset from the mean unemployment rate for visibility.
+y Position:
+
+Adjust the y-coordinate dynamically using:
+R
+Copy code
+y = max(table(cut(analysis_data$unemployment_rate, breaks = 20))) * 0.8
+This places the label at 80% of the maximum count, ensuring it is clearly visible above the bars.
+Horizontal and Vertical Alignment:
+
+Use hjust (horizontal alignment) and vjust (vertical alignment) to fine-tune the position of the label relative to the x and y coordinates:
+hjust = 0: Aligns the label's left side to the x position.
+vjust = 0: Aligns the label's bottom to the y position.
+Label Size and Color:
+
+Set size = 5 for better readability and color = "black" to ensure the label stands out.
+How to Experiment with Label Position:
+Increase or decrease the value added to x and y in the annotate() function to move the label left, right, up, or down:
+Example: x = mean(analysis_data$unemployment_rate, na.rm = TRUE) + 2 moves the label further to the right.
+Example: y = max(...) * 0.9 moves the label closer to the top.
+Let me know if you'd like further refinements!
+
 
 User:
+how to change the location of left & right point annotate?
 
 ChatGPT:
+To change the location of the annotations for the left and right points, you can adjust the x and y coordinates in the annotate() function. The x coordinate determines the horizontal position (along the x-axis), and the y coordinate determines the vertical position (along the y-axis). Here's how you can modify their positions:
+
+Updated Code with Adjustable Positions
+R
+Copy code
+ggplot(analysis_data %>% filter(unemployment_rate >= 0 & unemployment_rate <= 10), 
+       aes(x = unemployment_rate)) +
+  geom_histogram(
+    binwidth = 0.5, 
+    fill = "#2ecc71", 
+    color = "#27ae60", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(density * nrow(analysis_data) * 0.5)), 
+    color = "#2c3e50", 
+    fill = "#2980b9", 
+    alpha = 0.2
+  ) +
+  # Annotate left point
+  annotate(
+    "text", 
+    x = left_point - 0.1,   # Adjust horizontal position (slightly left of the point)
+    y = 100,                # Adjust vertical position
+    label = paste("Left:", round(left_point, 3)), 
+    color = "red",
+    size = 4
+  ) +
+  # Annotate right point
+  annotate(
+    "text", 
+    x = right_point + 0.1,  # Adjust horizontal position (slightly right of the point)
+    y = 100,                # Adjust vertical position
+    label = paste("Right:", round(right_point, 3)), 
+    color = "blue",
+    size = 4
+  ) +
+  labs(
+    title = "Distribution of Unemployment Rates",
+    x = "Unemployment Rate (%)",
+    y = "Count of States"
+  ) +
+  theme_minimal()
+Key Adjustments
+x Coordinate:
+
+left_point - 0.1: Moves the annotation for the left point slightly to the left.
+right_point + 0.1: Moves the annotation for the right point slightly to the right.
+y Coordinate:
+
+Both annotations are moved vertically using y = 100. You can adjust this value to position the annotations higher or lower.
+Font Size:
+
+size = 4 controls the font size of the annotations. You can increase or decrease it as needed.
+Example Adjustments
+If the left annotation overlaps with the histogram bars, you can move it further left by decreasing the x value (e.g., x = left_point - 0.2). Similarly, to place the right annotation higher, increase the y value (e.g., y = 150).
 
 
 User:
+Also add left&Right point on Metro Area Population Share & Non-White Population Share these two graphs
 
 ChatGPT:
+To add annotations for the left and right points of Metro Area Population Share and Non-White Population Share graphs, you can follow a similar approach. Below are the updated code examples for both graphs:
+
+Metro Area Population Share Graph
+R
+Copy code
+ggplot(analysis_data %>% filter(metro_area_population_share >= 0 & metro_area_population_share <= 1), 
+       aes(x = metro_area_population_share)) +
+  geom_histogram(
+    binwidth = 0.1, 
+    fill = "#2ecc71", 
+    color = "#27ae60", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(density * nrow(analysis_data) * 0.1)), 
+    color = "#2c3e50", 
+    fill = "#2980b9", 
+    alpha = 0.2
+  ) +
+  # Annotate left point
+  annotate(
+    "text", 
+    x = min(analysis_data$metro_area_population_share) - 0.05,   # Adjust horizontal position
+    y = 50,                                                     # Adjust vertical position
+    label = paste("Left:", round(min(analysis_data$metro_area_population_share), 3)), 
+    color = "red",
+    size = 4
+  ) +
+  # Annotate right point
+  annotate(
+    "text", 
+    x = max(analysis_data$metro_area_population_share) + 0.05,   # Adjust horizontal position
+    y = 50,                                                     # Adjust vertical position
+    label = paste("Right:", round(max(analysis_data$metro_area_population_share), 3)), 
+    color = "blue",
+    size = 4
+  ) +
+  labs(
+    title = "Distribution of Metro Area Population Share",
+    x = "Metro Area Population Share",
+    y = "Count of States"
+  ) +
+  theme_minimal()
+Non-White Population Share Graph
+R
+Copy code
+ggplot(analysis_data %>% filter(non_white_population_share >= 0 & non_white_population_share <= 1), 
+       aes(x = non_white_population_share)) +
+  geom_histogram(
+    binwidth = 0.1, 
+    fill = "#e74c3c", 
+    color = "#c0392b", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(density * nrow(analysis_data) * 0.1)), 
+    color = "#34495e", 
+    fill = "#9b59b6", 
+    alpha = 0.2
+  ) +
+  # Annotate left point
+  annotate(
+    "text", 
+    x = min(analysis_data$non_white_population_share) - 0.05,   # Adjust horizontal position
+    y = 50,                                                    # Adjust vertical position
+    label = paste("Left:", round(min(analysis_data$non_white_population_share), 3)), 
+    color = "red",
+    size = 4
+  ) +
+  # Annotate right point
+  annotate(
+    "text", 
+    x = max(analysis_data$non_white_population_share) + 0.05,   # Adjust horizontal position
+    y = 50,                                                    # Adjust vertical position
+    label = paste("Right:", round(max(analysis_data$non_white_population_share), 3)), 
+    color = "blue",
+    size = 4
+  ) +
+  labs(
+    title = "Distribution of Non-White Population Share",
+    x = "Non-White Population Share",
+    y = "Count of States"
+  ) +
+  theme_minimal()
+Notes on Adjustments:
+x Values for Annotations:
+
+Use min() and max() to find the leftmost and rightmost values in the dataset.
+Adjust their positions slightly with - 0.05 and + 0.05 to avoid overlap.
+y Values for Annotations:
+
+Use a constant value (e.g., y = 50) to position the annotations vertically. You can adjust this depending on the height of the histogram bars.
+Color and Size:
+
+Red for the left point and blue for the right point, with size set to 4 for readability.
+These adjustments will ensure that the left and right points of both variables are clearly annotated on their respective graphs.
 
 
 User:
+Error in corrplot(cor(analysis_data %>% select(-state)), method = "color",  : 
+  could not find function "corrplot"
+
+ChatGPT:
+The error indicates that the corrplot package is not installed or not loaded in your R session. To resolve this, you can install and load the corrplot package as follows:
+
+Solution
+Install the corrplot package (if not already installed):
+
+R
+Copy code
+install.packages("corrplot")
+Load the corrplot library:
+
+R
+Copy code
+library(corrplot)
+Then, rerun your code:
+
+R
+Copy code
+corrplot(cor(analysis_data %>% select(-state), use = "complete.obs"), 
+         method = "color", 
+         addCoef.col = "black", 
+         tl.col = "black", 
+         tl.srt = 45, 
+         diag = FALSE)
+Explanation
+install.packages("corrplot"): Ensures that the required package is available in your R environment.
+library(corrplot): Makes the corrplot functions accessible in your script.
+cor(analysis_data %>% select(-state), use = "complete.obs"): Computes the correlation matrix, excluding the state column and handling missing values with use = "complete.obs".
+diag = FALSE: Excludes the diagonal from the correlation plot.
+addCoef.col = "black": Adds correlation coefficients in black font.
+This should resolve the issue and produce the correlation plot.
+
+
+User:
+change the location of mean, it is too high "  geom_text(
+    aes(
+      x = mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE),
+      y = max(table(cut(analysis_data$hate_crimes_per_100k_splc, breaks = 10))) - 1,
+      label = paste0("Mean: ", round(mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE), 2))
+    ),
+    color = "red", vjust = -1"
+
+ChatGPT:
+To change the location of the mean label, you can adjust the y value in the aes() function and the vjust parameter. Here's the updated code:
+
+r
+Copy code
+geom_text(
+    aes(
+      x = mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE),
+      y = max(table(cut(analysis_data$hate_crimes_per_100k_splc, breaks = 10))) * 0.8,  # Adjust y position
+      label = paste0("Mean: ", round(mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE), 2))
+    ),
+    color = "red", vjust = -0.5  # Adjust vertical alignment
+)
+Explanation:
+y Value: The position of the label is now set at 80% of the maximum histogram bar height by multiplying max(table(...)) by 0.8. You can adjust this value further if needed.
+vjust: This fine-tunes the vertical alignment of the text relative to the y position. Setting vjust = -0.5 makes the label sit just slightly above the specified y coordinate.
+You can run this updated segment in your code to ensure the mean label's position is clearly visible and not overlapping with the bars.
+
+
+User:
+how to move Annotation from left side to right side?
+
+ChatGPT:
+To move the annotation to the right side of the graph, you can adjust the x and y arguments in the grid.text() function. Here’s the modified code:
+
+Updated Code to Move Annotation to the Right Side
+r
+Copy code
+# Load necessary library
+library(grid)
+
+# Correlation plot with renamed variables
+renamed_data <- analysis_data %>%
+  rename(
+    income = median_income,
+    unemployment = unemployment_rate,
+    population = metro_area_population_share,
+    education = high_school_education_share,
+    Gini = gini_index,
+    non_white_population = non_white_population_share,
+    hate_crimes = hate_crimes_per_100k_splc,
+    avg_hatecrimes = avg_hatecrimes_per_100k_fbi
+  )
+
+# Open a graphical device for multi-panel layout
+grid.newpage()
+pushViewport(viewport(layout = grid.layout(1, 2, widths = unit(c(2, 1), "null"))))  # Two columns layout
+
+# Place the corrplot in the left panel
+pushViewport(viewport(layout.pos.row = 1, layout.pos.col = 1))
+corrplot(
+  cor(renamed_data %>% select(-state), use = "complete.obs"), 
+  method = "color", 
+  addCoef.col = "black", 
+  tl.col = "black", 
+  tl.cex = 0.8,   # Adjust text label size
+  tl.srt = 45,    # Rotate labels
+  diag = FALSE
+)
+popViewport()
+
+# Add annotation in the right panel
+pushViewport(viewport(layout.pos.row = 1, layout.pos.col = 2))
+grid.text(
+  "Annotations:\n
+  income = median_income\n
+  unemployment = unemployment_rate\n
+  population = metro_area_population_share\n
+  education = high_school_education_share\n
+  Gini = gini_index\n
+  non_white_population = non_white_population_share\n
+  hate_crimes = hate_crimes_per_100k_splc\n
+  avg_hatecrimes = avg_hatecrimes_per_100k_fbi",
+  x = 0.1, y = 0.5, just = "left", gp = gpar(fontsize = 10)  # Adjusted for right panel
+)
+popViewport()
+Key Changes:
+Two-Column Layout: Changed the layout from rows (grid.layout(2, 1)) to columns (grid.layout(1, 2)) to place the annotation beside the correlation plot.
+widths = unit(c(2, 1), "null"): The first column (for the plot) is twice as wide as the second column (for annotations).
+Annotation Placement: Placed the annotation in the second column using layout.pos.col = 2.
+Adjusted x = 0.1, y = 0.5 in grid.text() to align the annotation neatly within the right panel.
+Output:
+The correlation plot will now appear on the left side, and the annotation text will be neatly aligned on the right side of the graph. Adjust x and y values to fine-tune the annotation's position.
+
+User:
+what does each term means pushViewport(viewport(layout = grid.layout(1, 3, widths = unit(c(2, 0.5, 1.5), "null")))) 
+
+ChatGPT:
+The line pushViewport(viewport(layout = grid.layout(1, 3, widths = unit(c(2, 0.5, 1.5), "null")))) creates a layout for the canvas with one row and three columns, and specifies the relative widths of these columns. Here's a detailed explanation of each term:
+
+1. viewport:
+A viewport defines a region of the graphical canvas where you can draw content.
+In this case, the viewport is configured to use a specific layout defined by grid.layout().
+2. grid.layout(1, 3, widths = ...):
+Defines the layout of the canvas with 1 row and 3 columns.
+widths = unit(c(2, 0.5, 1.5), "null") specifies the relative widths of these columns:
+2 (First Column): The correlation plot.
+0.5 (Second Column): A spacer column to add separation between the plot and annotation text.
+1.5 (Third Column): Reserved for the annotation text.
+The "null" unit means the sizes are proportional, and these numbers define their relative proportions.
+For example, the first column is twice as wide as the second column and 1.33 times as wide as the third column.
+3. pushViewport():
+This function activates the viewport defined by the layout so that all subsequent drawing occurs within this layout.
+The viewport remains active until you close it with popViewport().
+4. layout.pos.row and layout.pos.col (Used later with viewport(layout.pos.row = ..., layout.pos.col = ...)):
+These specify which part of the layout the content will be placed in.
+layout.pos.row: The row of the layout.
+layout.pos.col: The column of the layout.
+For example:
+layout.pos.col = 1 means content will go into the first column.
+layout.pos.col = 3 means content will go into the third column.
+Summary of the Layout:
+The canvas is divided into 3 proportional columns:
+First Column (2 parts): Contains the correlation plot.
+Second Column (0.5 parts): Adds spacing between the plot and the annotation.
+Third Column (1.5 parts): Contains the annotation text.
+By specifying proportions like 2, 0.5, 1.5, you control how much space each column occupies relative to the total width of the canvas. You can adjust these values to make columns wider or narrower as needed.
+
+
+User:
+Quitting from lines 464-502 [fig-corr] (paper.qmd)
+                                                                                                                           
+Execution halted
+
+
+processing file: paper.qmd
+  |......................               |  59% [fig-corr]                      Error in value[[3L]]():
+! cannot pop the top-level viewport ('grid' and 'graphics' output mixed?)
+Backtrace:
+  1. global .main()
+  2. execute(...)
+  3. rmarkdown::render(...)
+  4. knitr::knit(knit_input, knit_output, envir = envir, quiet = quiet)
+  5. knitr:::process_file(text, output)
+     ...
+ 25. grDevices::replayPlot(x)
+ 26. base::tryCatch(.External2(C_playSnapshot, x), error = restore)
+ 27. base (local) tryCatchList(expr, classes, parentenv, handlers)
+ 28. base (local) tryCatchOne(expr, names, parentenv, handlers[[1L]])
+ 29. value[[3L]](cond)
+
+
+
+Quitting from lines 464-502 [fig-corr] (paper.qmd)
+                                                                                                                           
+Execution halted
+
+ChatGPT:
+The error cannot pop the top-level viewport ('grid' and 'graphics' output mixed?) occurs because the grid graphics system, which is used by corrplot, is being mixed with base R graphics commands or additional grid commands that disrupt the current viewport system. This typically happens when using grid-based plotting in conjunction with functions that alter the graphical state.
+
+To resolve this:
+
+Fix the fig-corr Section
+Ensure that corrplot is not interfered with by other grid graphics commands. Here's how you can adjust your code:
+
+r
+Copy code
+#| label: fig-corr
+#| fig-cap: Correlation Matrix of Socioeconomic Predictors and Hate Crime Rates, illustrating key relationships such as negative associations between income and unemployment and positive links between non-White population share and hate crimes.
+#| echo: false
+
+# Ensure the grid graphics system is clean before and after plotting
+library(corrplot)
+grid.newpage() # Start a clean grid graphics page
+
+corrplot(cor(analysis_data %>% select(-state), use = "complete.obs"), 
+         method = "color", 
+         addCoef.col = "black", 
+         tl.col = "black", 
+         tl.srt = 45, 
+         diag = FALSE)
+
+grid.rect(gp = gpar(col = NA)) # Add a rect to avoid mixing graphical systems
+Key Points:
+Add grid.newpage(): This resets the grid graphical system before running corrplot, ensuring that no previous viewport interferes.
+Avoid mixing base and grid graphics: Don't use base plotting commands (like plot(), points()) alongside grid graphics (corrplot uses grid).
+Maintain Viewports: If using custom layouts or viewports, ensure they are cleanly set up and torn down.
+Alternative Debugging Steps:
+Run the corrplot Code Separately:
+
+Comment out fig-corr in your qmd file.
+Run the code manually in an R session to check if the issue persists.
+Ensure Plotting Device Compatibility:
+
+If rendering in RStudio or a Markdown environment, make sure your device supports grid graphics (e.g., PNG or PDF output).
+By following these adjustments, your correlation plot should render correctly without viewport conflicts.
+
+
+User:
+> posterior_summary_df <- posterior_summary_df[, c("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI")]
+Error in `[.data.frame`(posterior_summary_df, , c("Parameter", "Mean",  : 
+  undefined columns selected
+
+ChatGPT:
+This error suggests that the posterior_summary_df data frame does not contain the specified column names ("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI"). To resolve this, we need to check the structure of posterior_summary_df and rename columns correctly.
+
+Here's how to fix this:
+
+Step-by-Step Fix
+Inspect posterior_summary_df Run the following code to check what columns exist:
+
+r
+Copy code
+colnames(posterior_summary_df)
+This will show the column names in your posterior_summary_df. For example, they might be V1, V2, etc., or something else.
+
+Rename Columns Appropriately Once you know the actual column names, rename them to match your intended structure:
+
+r
+Copy code
+colnames(posterior_summary_df) <- c("Mean", "Std. Error", "2.5% CI", "97.5% CI", "Parameter")
+Make sure the number of column names in colnames() matches the number of columns in your posterior_summary_df.
+
+Select Relevant Columns After renaming, you can safely subset the data frame:
+
+r
+Copy code
+posterior_summary_df <- posterior_summary_df[, c("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI")]
+Updated Code Example
+Here’s the corrected code in its entirety:
+
+r
+Copy code
+# Extract the posterior draws as a matrix
+posterior_draws <- as.matrix(bayesian_model)
+
+# Calculate the posterior summaries
+posterior_summary <- apply(posterior_draws, 2, function(x) {
+  c(
+    Mean = mean(x),
+    `Std. Error` = sd(x),
+    `2.5% CI` = quantile(x, 0.025),
+    `97.5% CI` = quantile(x, 0.975)
+  )
+})
+
+# Convert to a data frame
+posterior_summary_df <- as.data.frame(t(posterior_summary))
+
+# Rename columns
+colnames(posterior_summary_df) <- c("Mean", "Std. Error", "2.5% CI", "97.5% CI")
+
+# Add Parameter names as a column (if missing)
+posterior_summary_df$Parameter <- rownames(posterior_summary_df)
+
+# Filter and rearrange columns
+posterior_summary_df <- posterior_summary_df[, c("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI")]
+
+# Display as a formatted table
+knitr::kable(posterior_summary_df, digits = 3, caption = "Posterior Estimates for Model Coefficients")
+Expected Output Table
+Parameter	Mean	Std. Error	2.5% CI	97.5% CI
+median_income	0.345	0.045	0.256	0.432
+unemployment_rate	-0.152	0.034	-0.220	-0.078
+metro_area_population_share	0.098	0.025	0.050	0.148
+...	...	...	...	...
+Let me know if this resolves your issue!
+
+
+User:
+Error in traceplot(bayesian_model) : could not find function "traceplot"
+
+ChatGPT:
+The traceplot function is no longer available in the rstanarm package. Instead, you can use the mcmc_trace() function from the bayesplot package, which is designed for plotting MCMC diagnostics like trace plots. Here's how you can resolve the issue:
+
+Updated Code for Trace Plot:
+r
+Copy code
+# Install and load the bayesplot package if not already installed
+if (!requireNamespace("bayesplot", quietly = TRUE)) {
+  install.packages("bayesplot")
+}
+
+library(bayesplot)
+
+# Generate the trace plot for the bayesian_model
+mcmc_trace(as.array(bayesian_model), 
+           pars = c("median_income", "unemployment_rate", "metro_area_population_share", 
+                    "high_school_education_share", "gini_index", "non_white_population_share"),
+           facet_args = list(nrow = 3)) +
+  ggtitle("Trace Plot for MCMC Chains")
+Key Notes:
+bayesplot Dependency: The mcmc_trace() function comes from the bayesplot package, which integrates well with the rstanarm models.
+as.array() Conversion: You need to convert the rstanarm model object into an array format using as.array() for compatibility with mcmc_trace().
+Specifying Parameters: Use the pars argument to select specific parameters for the trace plot (e.g., median_income, unemployment_rate).
+Customization: You can customize the plot layout with the facet_args argument to control the number of rows/columns in the grid.
+This should resolve the issue and provide a clean and interpretable trace plot for your Bayesian model.
+
+
+User:  
+|............................                     |  58% [tbl-summary-model] Error:
+! object 'bayesian_model' not found
+Backtrace:
+ 1. base::as.matrix(bayesian_model)
+
+
+
+Quitting from lines 622-655 [tbl-summary-model] (paper.qmd)
+                                                                                                               
+Execution halted
 
 ChatGPT:
 

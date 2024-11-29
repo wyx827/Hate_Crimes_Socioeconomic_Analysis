@@ -8,6 +8,7 @@ date: today
 date-format: long
 abstract: "This study provides the relationship between socioeconomic factors and hate crimes across U.S. states using a Bayesian hierarchical framework. We analyze a dataset capturing hate crime incidence alongside state-level socioeconomic indicators such as median income, unemployment rates, and income inequality. Results reveal that higher income inequality and unemployment rates are associated with elevated hate crime rates, while higher median income is inversely related. These findings emphasize the need for targeted socioeconomic interventions to mitigate hate crime prevalence."
 format: pdf
+math: true
 number-sections: true
 bibliography: references.bib
 ---
@@ -23,7 +24,8 @@ library(ggplot2)
 library(rstanarm)      
 library(tidyr)        
 library(arrow)         
-library(readr)          
+library(readr)
+library(corrplot)
 
 # Library the cleaned data
 analysis_data <- read_csv(here::here("data/02-analysis_data/cleaned_hate_crimes.csv"))
@@ -40,90 +42,635 @@ The results demonstrate that states with higher income inequality and unemployme
 
 Understanding the socioeconomic determinants of hate crimes is essential for informing policies aimed at reducing their prevalence. This analysis provides evidence for the role of structural inequality and economic conditions in shaping hate crime patterns, offering a foundation for targeted policy interventions to foster safer and more equitable communities.
 
-The remainder of this paper is structured as follows. @sec-data describes the dataset, variables, and preprocessing steps. Section 3 outlines the methodological framework, including the Bayesian hierarchical model. Section 4 presents the results, accompanied by tables and visualizations. Section 5 discusses the implications, limitations, and potential future directions of the analysis. Section 6 concludes with a summary of the key findings and recommendations.
+The remainder of this paper is structured as follows. @sec-data describes the dataset, variables, and preprocessing steps. @sec-modelsetup outlines the methodological framework, including the Bayesian hierarchical model. @sec-results  presents the results, accompanied by tables and visualizations. @sec-discussion discusses the implications, limitations, and potential future directions of the analysis. @sec-Appendix concludes with a summary of the key findings and recommendations.
 
 
 # Data {#sec-data}
 
 ## Overview
 
-This study employs R [@citeR] for cleaning and analyzing the dataset, using libraries such as `dplyr` [@tidyverse], `ggplot2` [@ggplot2], and `arrow` [@arrow]. The dataset, sourced from [@hatecrimesdata], explores the relationships between socioeconomic variables and hate crime prevalence in the United States. It includes aggregated data for all 50 states and the District of Columbia.
+This study employs R [@citeR] for cleaning and analyzing the dataset, leveraging libraries such as `dplyr` [@tidyverse], `ggplot2` [@ggplot2], `corrplot` [@corrplot], and `arrow` [@arrow]. The dataset, sourced from FiveThirtyEight [@hatecrimesdata], investigates the relationships between socioeconomic variables and hate crime prevalence across the United States. It aggregates data for all 50 states and the District of Columbia.
 
-After preprocessing, which involved filtering missing values and standardizing key variables, the final analysis dataset consists of **51** observations across **7** key variables: `state`, `median_income`, `unemployment_rate`, `metro_area_population_share`, `high_school_education_share`, `gini_index`, and `non_white_population_share`. These variables capture essential socioeconomic conditions and their potential influence on hate crime rates, measured as `hate_crimes_per_100k_splc`.
+After preprocessing, which involved removing missing values, standardizing variables, and ensuring data consistency, the final dataset includes **51** observations for **7** predictors: `median_income`, `unemployment_rate`, `metro_area_population_share`, `high_school_education_share`, `gini_index`, and `non_white_population_share`. The outcome variable, `hate_crimes_per_100k_splc`, represents hate crime prevalence reported by the SPLC. Together, these variables form the foundation for examining socioeconomic influences on hate crime rates.
 
-## Measurement and Considerations 
+---
 
-The dataset focuses on measuring the influence of socioeconomic factors on hate crimes. Hate crime data is aggregated from credible sources, including the SPLC and FBI, and represents the prevalence of reported hate crimes per 100,000 residents.
+## Measurement and Considerations
 
-### Data Source and Quality Assurance
+Understanding how socioeconomic conditions translate into measurable data is vital for interpreting the results. Below, we discuss the key measurement aspects and their implications.
 
-The dataset was obtained from FiveThirtyEight[@hatecrimesdata], a trusted source recognized for its rigorous data quality standards. Each state-level observation documents essential socioeconomic and hate crime metrics, including income, unemployment, and population composition.
+- **Phenomena Representation**: Hate crime incidents, inherently complex societal phenomena, are represented in the dataset as `hate_crimes_per_100k_splc`, which quantifies the number of hate crimes reported per 100,000 residents in each state. This measure was derived from state-level aggregates reported by the SPLC, ensuring consistency across regions.
 
-To ensure comparability across states, socioeconomic indicators were standardized and checked for consistency. Hate crime data, while robust, is subject to underreporting and reporting bias, requiring careful interpretation.
+- **Data Collection Context**: Socioeconomic variables such as income, unemployment, and education are proxies for broader economic and social conditions. These data were collected from credible government sources and harmonized by FiveThirtyEight. The inclusion of standardized metrics, such as `gini_index` (inequality measure) and `metro_area_population_share`, ensures comparability across states despite regional disparities.
 
-### Temporal and Geographic Context
+- **Challenges in Measurement**: Hate crime data, while critical, is subject to biases in underreporting and differences in enforcement. States with higher transparency or stricter enforcement may report higher rates, not necessarily indicating a greater prevalence. Similarly, socioeconomic indicators such as `non_white_population_share` could interact with other unmeasured factors, complicating causal interpretations.
 
-The dataset provides a snapshot of state-level hate crime and socioeconomic data for a single year. While this ensures temporal consistency, it limits the ability to analyze trends over time. Additionally, regional disparities, such as differences in reporting standards or enforcement, may influence observed hate crime rates.
+- **Validation and Limitations**: Standardization ensures data comparability, but reliance on a single year of data limits trend analysis. This temporal snapshot captures static relationships, not dynamics over time. Additionally, state-level aggregation masks within-state heterogeneity, such as urban vs. rural differences in socioeconomic conditions and hate crime reporting.
+
+---
 
 ## Variables of Interest
 
-The analysis examines the relationships between `hate_crimes_per_100k_splc` (the outcome variable) and the following socioeconomic predictors. Below, we describe each variable and present visualizations to illustrate its distribution and relevance.
+This section introduces the dataset's key variables, including detailed descriptions, visualizations, and insights into their relevance. Visualizations illustrate distributions, relationships, and variability to contextualize their potential influence on hate crime rates.
 
 ### Outcome Variable: Hate Crimes Per 100k SPLC
 
-The outcome variable is the number of hate crimes per 100,000 residents, as reported by the SPLC. Its distribution, shown in @fig-hate-crimes, highlights variation across states, with most states reporting between 0.1 and 0.5 hate crimes per 100,000 residents. The variability suggests that some states experience disproportionately higher rates of hate crimes.
+The outcome variable, representing the number of hate crimes per 100,000 residents as reported by the SPLC, its distribution, shown in @fig-hate-crimes, exhibits a skewed distribution. Most states report hate crime rates between 0.1 and 0.5 per 100,000 residents. However, the presence of an outlier with a much higher rate highlights significant regional disparities. This variation underscores the importance of investigating contributing factors, such as socioeconomic, demographic, and policy-related influences, to understand the drivers of hate crimes.
 
 ```{r}
 #| label: fig-hate-crimes
-#| fig-cap: Distribution of Hate Crimes Per 100,000 Residents Across States
+#| fig-cap: Distribution of hate crimes per 100,000 residents, as reported by the SPLC, illustrating state-level variation. Most states report between 0.1 and 0.5 hate crimes per 100,000 residents, with a notable outlier indicating a disproportionately higher hate crime rate.
 #| echo: false
 #| warning: false
 #| message: false
+
+# Determine outlier values for better context
+max_hate_crimes <- max(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE)
+
 ggplot(analysis_data, aes(x = hate_crimes_per_100k_splc)) +
   geom_histogram(binwidth = 0.1, fill = "skyblue", color = "black", alpha = 0.7) +
-  labs(x = "Hate Crimes Per 100,000 Residents",
-       y = "Count of States") +
+  geom_vline(
+    xintercept = mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE),
+    color = "red", linetype = "dashed", label = "Mean"
+  ) +
+  geom_text(
+    aes(
+      x = mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE),
+      y = max(table(cut(analysis_data$hate_crimes_per_100k_splc, breaks = 10))) - 1,
+      label = paste0("Mean: ", round(mean(analysis_data$hate_crimes_per_100k_splc, na.rm = TRUE), 2))
+    ),
+    color = "red", vjust = 1
+  ) +
+  geom_text(
+    aes(
+      x = max_hate_crimes,
+      y = 1,
+      label = paste0("Outlier: ", round(max_hate_crimes, 2))
+    ),
+    color = "blue", vjust = -1
+  ) +
+  labs(
+    title = "Distribution of Hate Crimes Per 100,000 Residents",
+    x = "Hate Crimes Per 100,000 Residents",
+    y = "Count of States"
+  ) +
   theme_minimal()
+
 ```
 
 ## Predictor variables
 
+### Median Income
+
+Median income represents the annual income of the median household in each state, serving as a proxy for economic prosperity. As shown in @fig-median-income,  shows the distribution of median household income across states. There is a relatively normal distribution with a mean of $54,802 and a median of $54,310. The narrow spread suggests a clustering of household incomes around this value, with limited variation across states. This clustering might indicate consistency in income policies or similar economic opportunities in various regions of the United States.
+
+```{r}
+#| label: fig-median-income
+#| fig-cap: Distribution of median household income across states, illustrating the variation in income levels. The mean household income is $54,802, while the median is slightly lower at $54,310, indicating a slightly right-skewed distribution. The standard deviation of $9,255 highlights variability across states.
+#| echo: false
+#| warning: false
+#| message: false
+
+ggplot(analysis_data, aes(x = median_income)) +
+  geom_histogram(
+    binwidth = 5000, 
+    fill = "#3498db", 
+    color = "#2980b9", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(count)), 
+    color = "#2c3e50", 
+    fill = "#34495e", 
+    alpha = 0.2
+  ) +
+  geom_vline(
+    xintercept = c(mean(analysis_data$median_income), 
+                   median(analysis_data$median_income)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "green")
+  ) +
+  annotate(
+    "text", 
+    x = mean(analysis_data$median_income) + 5000, 
+    y = max(table(cut(analysis_data$median_income, breaks = 20))),
+    label = paste(
+      "Mean: $", round(mean(analysis_data$median_income), 0), 
+      "\nMedian: $", round(median(analysis_data$median_income), 0),
+      "\nSD: $", round(sd(analysis_data$median_income), 0)
+    )
+  ) +
+  labs(
+    title = "Distribution of Median Household Income",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Median Income (USD)",
+    y = "Count of States"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
+  
+  
+### Unemployment Rate
+
+The unemployment rate measures the percentage of individuals unemployed on a seasonal basis. As shown in @fig-unemployment, it shows an extremely narrow spread, with the mean and median unemployment rates both around 0.05%. This low variability suggests that unemployment rates are consistently low across states. The majority of states fall within a very small range of unemployment, which implies effective employment policies or consistent labor market dynamics nationwide.
+
+```{r}
+#| label: fig-unemployment
+#| fig-cap: Distribution of unemployment rates among states. The unemployment rate is centered around 0.05%, showing very low variability among states, suggesting uniform employment opportunities across regions.
+#| echo: false
+
+# Compute the density data
+density_data <- density(analysis_data$unemployment_rate, na.rm = TRUE)
+
+# Find the leftmost and rightmost points where the density is non-zero
+left_point <- min(density_data$x[density_data$y > 0])
+right_point <- max(density_data$x[density_data$y > 0])
+
+ggplot(analysis_data %>% filter(unemployment_rate >= 0 & unemployment_rate <= 10), 
+       aes(x = unemployment_rate)) +
+  # Histogram with appropriate binwidth
+  geom_histogram(
+    binwidth = 0.5, 
+    fill = "#2ecc71", 
+    color = "#27ae60", 
+    alpha = 0.7,
+  ) +
+  # Density plot scaled to match histogram counts
+  geom_density(
+    aes(y = after_stat(density * nrow(analysis_data) * 0.5)), 
+    color = "#2c3e50", 
+    fill = "#2980b9", 
+    alpha = 0.2
+  ) +
+  annotate(
+    "text", 
+    x = left_point - 0.15, 
+    y = 50,
+    label = paste("Left:", round(left_point, 3)), 
+    color = "red"
+  ) +
+  annotate(
+    "text", 
+    x = right_point + 0.2, 
+    y = 50, 
+    label = paste("Right:", round(right_point, 3)), 
+    color = "blue"
+  ) +
+  # Vertical lines for mean and median
+  geom_vline(
+    xintercept = c(mean(analysis_data$unemployment_rate, na.rm = TRUE), 
+                   median(analysis_data$unemployment_rate, na.rm = TRUE)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "blue")
+  ) +
+  # Annotating statistical summary at a clearer location
+  annotate(
+    "text", 
+    x = mean(analysis_data$unemployment_rate, na.rm = TRUE) + 1,  # Adjust x position
+    y = max(table(cut(analysis_data$unemployment_rate, breaks = 20))) * 0.8,  # Adjust y position
+    label = paste(
+      "Mean: ", round(mean(analysis_data$unemployment_rate, na.rm = TRUE), 3), "%",
+      "\nMedian: ", round(median(analysis_data$unemployment_rate, na.rm = TRUE), 3), "%",
+      "\nSD: ", round(sd(analysis_data$unemployment_rate, na.rm = TRUE), 2), "%"
+    ),
+    hjust = 1,  # Adjust horizontal alignment
+    vjust = -1,  # Adjust vertical alignment
+    color = "black",
+    size = 5
+  ) +
+  # Labels and title
+  labs(
+    title = "Distribution of Unemployment Rates",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Unemployment Rate (%)",
+    y = "Count of States"
+  ) +
+  # Minimal theme for clarity
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+```
+
+
+### Metro Area Population Share
+
+Metro area population share reflects the proportion of a state's population residing in metropolitan areas, which means states with higher urbanization levels may experience unique social dynamics influencing hate crime prevalence. As shown in @fig-metro-share, it shares reveals that the majority of states have a population share in metro areas concentrated around 0.77, with a standard deviation of 0.2. This suggests that many states have a high proportion of their populations in metropolitan areas, reflecting the urban-centric population distribution and possibly highlighting urbanization trends in the U.S.
+```{r}
+#| label: fig-metro-share
+#| fig-cap: Distribution of metro area population share for states, showing the extent to which populations are concentrated in metropolitan areas. Most states have metro area shares clustered around 0.77, indicating a high proportion of urbanized population.
+#| echo: false
+
+ggplot(analysis_data, aes(x = metro_area_population_share)) +
+  geom_histogram(
+    binwidth = 5, 
+    fill = "#f39c12", 
+    color = "#d35400", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(count)), 
+    color = "#2c3e50", 
+    fill = "#e67e22", 
+    alpha = 0.2
+  ) +
+  # Annotate left point
+  annotate(
+    "text", 
+    x = min(analysis_data$metro_area_population_share) - 0.25,   # Adjust horizontal position
+    y = 50,                                                     # Adjust vertical position
+    label = paste("Left:", round(min(analysis_data$metro_area_population_share), 3)), 
+    color = "red",
+    size = 4
+  ) +
+  # Annotate right point
+  annotate(
+    "text", 
+    x = max(analysis_data$metro_area_population_share) + 0.45,   # Adjust horizontal position
+    y = 50,                                                     # Adjust vertical position
+    label = paste("Right:", round(max(analysis_data$metro_area_population_share), 3)), 
+    color = "blue",
+    size = 4
+  ) +
+  geom_vline(
+    xintercept = c(mean(analysis_data$metro_area_population_share), 
+                   median(analysis_data$metro_area_population_share)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "green")
+  ) +
+  annotate(
+    "text", 
+    x = mean(analysis_data$metro_area_population_share) + 5, 
+    y = max(table(cut(analysis_data$metro_area_population_share, breaks = 20))),
+    label = paste(
+      "Mean: ", round(mean(analysis_data$metro_area_population_share), 2), "%",
+      "\nMedian: ", round(median(analysis_data$metro_area_population_share), 2), "%",
+      "\nSD: ", round(sd(analysis_data$metro_area_population_share), 1)
+    ),
+    hjust = 1,  # Adjust horizontal alignment
+    vjust = -1  # Adjust vertical alignment
+  ) +
+  labs(
+    title = "Metro Area Population Share Distribution",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Metro Area Population Share (%)",
+    y = "Count of States"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
 
 
 
+### Gini Index
+
+The Gini Index measures income inequality, with higher values indicating greater disparity. As shown in @fig-gini, it is centered around a mean of 0.456 and a median of 0.455. The relatively narrow spread in Gini values across states suggests that income inequality is consistent across the nation, with most states experiencing moderate levels of income disparity. This consistency may reflect similar economic structures or social policies.
+```{r}
+#| label: fig-gini
+#| fig-cap: Distribution of Gini Index values across states, indicating income inequality. Most states exhibit a Gini Index value around 0.455, suggesting moderate levels of income inequality.
+#| echo: false
+
+ggplot(analysis_data, aes(x = gini_index)) +
+  geom_histogram(
+    binwidth = 0.02, 
+    fill = "#9b59b6", 
+    color = "#8e44ad", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(count)), 
+    color = "#2c3e50", 
+    fill = "#673ab7", 
+    alpha = 0.2
+  ) +
+  geom_vline(
+    xintercept = c(mean(analysis_data$gini_index), 
+                   median(analysis_data$gini_index)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "green")
+  ) +
+  annotate(
+    "text", 
+    x = mean(analysis_data$gini_index) + 0.05, 
+    y = max(table(cut(analysis_data$gini_index, breaks = 20))),
+    label = paste(
+      "Mean: ", round(mean(analysis_data$gini_index), 3),
+      "\nMedian: ", round(median(analysis_data$gini_index), 3),
+      "\nSD: ", round(sd(analysis_data$gini_index), 2)
+    ),
+    hjust = 1,  # Adjust horizontal alignment
+    vjust = -1  # Adjust vertical alignment
+  ) +
+  labs(
+    title = "Distribution of Gini Index",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Gini Index",
+    y = "Count of States"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
 
 
+### Non-White Population Share
+
+This variable represents the proportion of non-white residents in each state. Higher non-white population shares may correlate with higher hate crime rates due to increased exposure to discriminatory behavior. As shown in @fig-nonwhite-share, this distribution of non-white population share indicates that most states have around 30% non-white residents. This suggests a considerable level of ethnic diversity across the nation. The mean of 0.32 and median of 0.3 show a moderate concentration of non-white population, reflecting varying levels of demographic diversity in different states.
+```{r}
+#| label: fig-nonwhite-share
+#| fig-cap: Distribution of non-white population shares across states. The majority of states have a non-white population share around 0.3, reflecting regional diversity levels.
+#| echo: false
+
+ggplot(analysis_data, aes(x = non_white_population_share)) +
+  geom_histogram(
+    binwidth = 5, 
+    fill = "#e74c3c", 
+    color = "#c0392b", 
+    alpha = 0.7
+  ) +
+  geom_density(
+    aes(y = after_stat(count)), 
+    color = "#2c3e50", 
+    fill = "#ff6b6b", 
+    alpha = 0.2
+  ) +
+  # Annotate left point
+  annotate(
+    "text", 
+    x = min(analysis_data$non_white_population_share) - 0.6,   # Adjust horizontal position
+    y = 50,                                                    # Adjust vertical position
+    label = paste("Left:", round(min(analysis_data$non_white_population_share), 3)), 
+    color = "red",
+    size = 4
+  ) +
+  # Annotate right point
+  annotate(
+    "text", 
+    x = max(analysis_data$non_white_population_share) + 0.6,   # Adjust horizontal position
+    y = 50,                                                    # Adjust vertical position
+    label = paste("Right:", round(max(analysis_data$non_white_population_share), 3)), 
+    color = "blue",
+    size = 4
+  ) +
+  geom_vline(
+    xintercept = c(mean(analysis_data$non_white_population_share), 
+                   median(analysis_data$non_white_population_share)),
+    linetype = c("dashed", "dotted"),
+    color = c("red", "green")
+  ) +
+  annotate(
+    "text", 
+    x = mean(analysis_data$non_white_population_share) + 5, 
+    y = max(table(cut(analysis_data$non_white_population_share, breaks = 20))),
+    label = paste(
+      "Mean: ", round(mean(analysis_data$non_white_population_share), 2), "%",
+      "\nMedian: ", round(median(analysis_data$non_white_population_share), 2), "%",
+      "\nSD: ", round(sd(analysis_data$non_white_population_share), 1)
+    ),
+    hjust = 1,  # Adjust horizontal alignment
+    vjust = -1  # Adjust vertical alignment
+  ) +
+  labs(
+    title = "Non-White Population Share Distribution",
+    subtitle = paste("Number of States:", nrow(analysis_data)),
+    x = "Non-White Population Share (%)",
+    y = "Count of States"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+```
+
+
+
+## Summary Statistics and Variable Relationships
+The relationships between predictors and hate crimes were explored using correlation matrices, summarized in @fig-corr. The correlation heatmap summarizes the relationships between various variables, providing insight into potential predictors of hate crimes per 100k SPLC. Notable correlations include the positive relationship between high school education share and metro area population share (r = 0.57), and between Gini Index and unemployment rate (r = 0.49). The relationship between hate crimes per 100k SPLC and non-white population share is weak, suggesting limited direct influence of ethnic diversity on hate crime prevalence at the state level.
+```{r}
+#| label: fig-corr
+#| fig-cap: Correlation heatmap of predictor variables, showing relationships among median household income, unemployment rate, metro area population share, high school education share, Gini index, and hate crimes per 100k SPLC. (income = median_income, unemployment = unemployment_rate, population = metro_area_population_share, education = high_school_education_share, Gini = gini_index, non_white_population = non_white_population_share, hate_crimes = hate_crimes_per_100k_splc, avg_hatecrimes = avg_hatecrimes_per_100k_fbi)
+#| echo: false
+
+# Load necessary libraries
+library(corrplot)
+
+# Rename the variables for clarity
+renamed_data <- analysis_data %>%
+  rename(
+    income = median_income,
+    unemployment = unemployment_rate,
+    population = metro_area_population_share,
+    education = high_school_education_share,
+    Gini = gini_index,
+    non_white_population = non_white_population_share,
+    hate_crimes = hate_crimes_per_100k_splc,
+    avg_hatecrimes = avg_hatecrimes_per_100k_fbi
+  )
+
+# Generate the correlation heatmap
+corrplot(
+  cor(renamed_data %>% select(-state), use = "complete.obs"), 
+  method = "color", 
+  addCoef.col = "black",   # Add correlation coefficients
+  tl.col = "black",        # Color of the text labels
+  number.cex = 0.6,        # Reduce the size of the correlation coefficient text
+  tl.cex = 0.6,            # Adjust text label size
+  tl.srt = 45,             # Rotate text labels for clarity
+  diag = FALSE             # Remove diagonal correlations
+)
+
+
+```
 
 
 
 
 # Model {#sec-modelsetup}
 
-The goal of our modelling strategy is twofold. Firstly,...
+## Model Selection
+To analyze the relationship between socioeconomic factors and hate crimes, a **Bayesian hierarchical model** was chosen. This model accounts for state-level heterogeneity by including random effects for states, allowing for variability in hate crimes that might be influenced by unobserved state-specific factors. The Bayesian framework also allows incorporating prior knowledge and managing uncertainty effectively.
 
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model].
+Alternative models were considered, including:
 
-## Model set-up
+1. **Logistic Regression**: This model was used for scaling hate crimes within the range (0, 1). However, logistic regression is primarily suited for binary or bounded outcomes and may not capture the full variability of continuous predictors in this dataset.
 
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
+2. **Simple Linear Regression**: While linear regression can estimate the relationship between hate crimes and individual predictors, it does not accommodate hierarchical structures or address multilevel variability, making it less robust for this dataset.
 
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
+The **Bayesian hierarchical model** was selected as it provides the flexibility to model the complex relationships between hate crimes and predictors while considering the state-level effects.
+
+Model diagnostics, implementation details, insights from the model summary, limitations, and alternative models considered are comprehensively documented in [Appendix -@sec-model], ensuring transparency and replicability of the analysis.
+
+## Bayesian Hierarchical Model Overview
+
+The model predicts hate crimes per 100,000 residents (`hate_crimes_per_100k_splc`) using the following predictors:
+
+- **Median Household Income (`median_income`)**: Captures the economic status of residents within each state.
+- **Unemployment Rate (`unemployment_rate`)**: Measures the proportion of the population without jobs.
+- **Metro Area Population Share (`metro_area_population_share`)**: Reflects the proportion of residents living in metropolitan areas.
+- **High School Education Share (`high_school_education_share`)**: Indicates the proportion of residents with at least a high school diploma.
+- **Gini Index (`gini_index`)**: Measures income inequality within each state.
+- **Non-White Population Share (`non_white_population_share`)**: Reflects the demographic diversity within each state.
+- **State (`state`)**: Included as a random effect to capture state-specific variability.
+
+The model takes the form:
+
+\[
+\text{Hate Crimes}_i = \beta_0 + \beta_1 \cdot \text{Income}_i + \beta_2 \cdot \text{Unemployment}_i + \beta_3 \cdot \text{Population}_i + \beta_4 \cdot \text{Education}_i + \beta_5 \cdot \text{Gini}_i + \beta_6 \cdot \text{NonWhite}_i + u_i + \epsilon_i
+\]
+
+Where:
+
+- \(\beta_0\) is the intercept term.
+- \(\beta_1, \beta_2, \dots, \beta_6\) are coefficients for the fixed effects (predictors).
+- \(u_i\) represents the random effects for state-level variations.
+- \(\epsilon_i \sim \text{Normal}(0, \sigma^2)\) is the residual error term.
+
+### Assumptions and Priors
+
+Key assumptions for the Bayesian hierarchical model include:
+
+1. **Linearity**: The relationship between predictors and the outcome is linear.
+2. **Homoscedasticity**: The residuals have constant variance.
+3. **Random Effects**: State-level random effects capture unobserved variability.
+4. **Normality**: Errors are normally distributed.
+5. **Priors**: Normal priors with mean 0 and standard deviation 2.5 are used for coefficients and intercepts, allowing for flexibility while avoiding extreme values.
+
+The prior distributions are as follows:
+\begin{align}
+\beta_j &\sim \text{Normal}(0, 2.5), \quad \forall j
 \end{align}
 
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
+
+## Interpretation of Coefficients
+The Bayesian hierarchical model estimates the relationship between socioeconomic predictors and hate crimes per 100,000 residents. Below is the interpretation of each coefficient:
+
+### Fixed Effects
+
+- **Intercept (\(\beta_0\))**: 
+  The intercept represents the baseline predicted hate crimes per 100,000 residents when all predictors (median income, unemployment rate, metro area population share, high school education share, Gini index, and non-white population share) are at their mean or baseline values. This serves as the reference point for interpreting the effects of the predictors.
+
+- **Median Household Income (\(\beta_1\))**: 
+  This coefficient indicates how a $1,000 increase in median household income affects the predicted hate crimes per 100,000 residents. A negative coefficient suggests that higher income is associated with fewer hate crimes, potentially reflecting improved economic stability and reduced socioeconomic tension.
+
+- **Unemployment Rate (\(\beta_2\))**: 
+  This coefficient captures the effect of a 1% increase in the unemployment rate on the predicted hate crimes per 100,000 residents. A positive coefficient implies that higher unemployment is associated with more hate crimes, possibly due to heightened social stress and economic insecurity.
+
+- **Metro Area Population Share (\(\beta_3\))**: 
+  This coefficient represents the effect of a 1% increase in the proportion of residents living in metropolitan areas on the predicted hate crimes. A positive coefficient could indicate that urban areas, with their higher population density, may experience more hate crimes due to greater diversity and interpersonal interactions.
+
+- **High School Education Share (\(\beta_4\))**: 
+  This coefficient reflects how a 1% increase in the proportion of residents with at least a high school diploma impacts the predicted hate crimes. A negative coefficient suggests that higher education levels are associated with fewer hate crimes, highlighting the role of education in promoting tolerance and reducing prejudice.
+
+- **Gini Index (\(\beta_5\))**: 
+  The Gini index measures income inequality. This coefficient shows how a 0.01 increase in the Gini index affects hate crimes. A positive coefficient indicates that higher income inequality correlates with more hate crimes, suggesting that economic disparities may contribute to social tensions.
+
+- **Non-White Population Share (\(\beta_6\))**: 
+  This coefficient captures the effect of a 1% increase in the non-white population share on hate crimes. A positive coefficient may reflect increased targeting of minority groups in states with greater diversity.
+
+### Random Effects
+
+- **State-Level Effects (\(u_i\))**: 
+  The random effects account for state-specific variability in hate crime rates that cannot be explained by the predictors. These effects capture unobserved factors unique to each state, such as cultural, political, or enforcement differences.
+
+### Residual Variance (\(\sigma^2\))
+
+The residual variance represents the variability in hate crimes not accounted for by the model. A smaller residual variance indicates that the model explains more of the variability in hate crimes.
+
+---
+
+## Example Interpretation
+
+If the coefficient for **unemployment rate** (\(\beta_2\)) is \(0.25\), then a 1% increase in unemployment rate would lead to an increase of \(0.25\) hate crimes per 100,000 residents, holding all other predictors constant. Similarly, if the coefficient for **median household income** (\(\beta_1\)) is \(-0.05\), then a $1,000 increase in income would reduce hate crimes by \(0.05\) per 100,000 residents.
+
+## Implications
+
+The coefficients provide insights into how socioeconomic factors impact hate crimes. For example:
+
+- Policies targeting economic inequality (reducing the Gini index) and increasing educational attainment may help reduce hate crimes.
+- Urbanization and population diversity may require targeted interventions to address potential tensions.
+
+These interpretations guide the understanding of how predictors influence hate crimes and inform potential policy recommendations.
 
 
-### Model justification
+## Model Justification
+The following are interpretations of the predictors' coefficients from the Bayesian hierarchical model:
 
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
+- **Median Income**: The coefficient indicates how changes in state median income (in $1,000 units) affect hate crimes per 100,000 residents. A negative coefficient suggests that higher income reduces hate crimes, reflecting the protective effect of economic stability.
 
-We can use maths by including latex between dollar signs, for instance $\theta$.
+- **Unemployment Rate**: This coefficient shows how a 1% increase in unemployment affects hate crimes. A positive and statistically significant coefficient suggests that higher unemployment correlates with more hate crimes, likely due to increased social stress.
+
+- **Metro Area Population Share**: This coefficient reflects the effect of a 1% increase in metro area population share on hate crimes. A positive coefficient may indicate that more densely populated or urbanized areas experience slightly higher hate crimes, potentially due to greater diversity and social interactions.
+
+- **High School Education Share**: The coefficient represents the impact of a 1% increase in high school education attainment. A negative coefficient suggests that higher education levels reduce hate crimes, possibly by promoting tolerance and reducing prejudice.
+
+- **Gini Index**: The coefficient measures the effect of a 0.01 increase in the Gini index (income inequality). A positive coefficient suggests that higher income inequality is associated with more hate crimes, emphasizing the role of economic disparities in fostering tension.
+
+- **Non-White Population Share**: This coefficient captures the effect of a 1% increase in non-white population share. A positive coefficient may indicate that states with larger non-white populations experience more reported hate crimes, potentially reflecting targeted discrimination or diversity-related tensions.
+
+
+```{r}
+#| echo: false
+#| label: tbl-summary-model
+#| tbl-cap: Coefficient estimates from the Bayesian hierarchical model. The table shows the relationship between predictors and hate crimes per 100,000 residents (SPLC).
+#| warning: false
+#| message: false
+
+library(rstanarm)
+library(here)
+
+# Load the Bayesian model
+bayesian_model <- readRDS(here::here("models/final_bayesian_model.rds"))
+
+# Extract the posterior draws as a matrix
+posterior_draws <- as.matrix(bayesian_model)
+
+# Calculate the posterior summaries
+posterior_summary <- apply(posterior_draws, 2, function(x) {
+  c(
+    Mean = mean(x),
+    `Std. Error` = sd(x),
+    `2.5% CI` = quantile(x, 0.025),
+    `97.5% CI` = quantile(x, 0.975)
+  )
+})
+
+# Convert to a data frame
+posterior_summary_df <- as.data.frame(t(posterior_summary))
+
+# Rename columns
+colnames(posterior_summary_df) <- c("Mean", "Std. Error", "2.5% CI", "97.5% CI")
+
+# Add Parameter names as a column (if missing)
+posterior_summary_df$Parameter <- rownames(posterior_summary_df)
+
+# Filter and rearrange columns
+posterior_summary_df <- posterior_summary_df[, c("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI")]
+
+# Display as a formatted table
+knitr::kable(posterior_summary_df, digits = 3, caption = "Posterior Estimates for Model Coefficients")
+```
+
+
+
+
+
+
+
+
+
+
 
 
 # Results {#sec-results}
@@ -170,45 +717,142 @@ Our results are summarized in @tbl-modelresults.
 
 # Additional data details
 
+##  Outcome Variable: Hate Crimes Per 100k SPLC
+The histogram @fig-hate-crimes visualizes the distribution of hate crimes per 100,000 residents across U.S. states, as reported by the SPLC. 
+
+- **Concentration of Values**: 
+1. The majority of states report hate crime rates below 0.5 per 100,000 residents.
+2. A substantial portion of states cluster between 0.0 and 0.3 hate crimes per 100,000 residents, indicating that low rates are common nationwide.
+
+- **Skewed Distribution**: The distribution is right-skewed, with a long tail extending toward higher hate crime rates. This suggests that while most states experience relatively low hate crime rates, a few states report significantly higher rates.
+
+- **Outliers**: There is at least one state with a hate crime rate exceeding 1.0 per 100,000 residents, marking it as an outlier with unusually high prevalence. (State:District of Columbia, with hate crime rate **1.522302**)
+
+```{r}
+#| echo: false
+#| eval: false
+#| warning: false
+#| message: false
+
+# Identify the outlier state
+outlier_state <- analysis_data %>%
+  filter(hate_crimes_per_100k_splc > 1.0) %>%
+  select(state, hate_crimes_per_100k_splc)
+
+# Print the outlier state(s)
+print(outlier_state)
+```
+
+- **Implications for Analysis**:
+1. The variability in hate crime rates emphasizes the importance of analyzing socioeconomic factors to understand why certain states report higher rates.
+2. The skewness and presence of outliers highlight the need for robust statistical techniques to ensure results are not overly influenced by extreme values.
+
+This visualization provides a foundational understanding of the outcome variable, setting the stage for exploring relationships with predictor variables like income inequality, unemployment, and urbanization.
+
+
 \newpage
 
 # Additional Model details {#sec-model}
 
-## Posterior predictive check
+## Diagnostics and Validation
 
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
+### Trace Plot for MCMC Chains
 
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
+The trace plots (Figure @fig-trace) shows the Markov Chain Monte Carlo (MCMC) trace for each parameter in the Bayesian hierarchical model. The chains represent iterations for four independent MCMC chains for parameters including median_income, unemployment_rate, metro_area_population_share, high_school_education_share, gini_index, and non_white_population_share. The consistent overlap and lack of visible drift across chains suggest good mixing and convergence of the chains, indicating that the MCMC sampling is stable and has likely reached equilibrium.
 ```{r}
-#| eval: true
+#| label: fig-trace
+#| fig-cap: Trace plot of MCMC chains for the Bayesian model coefficients.
 #| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
 
+library(bayesplot)
+library(ggplot2)
+
+# Generate the trace plot for the bayesian_model
+mcmc_trace(
+  as.array(bayesian_model),
+  pars = c(
+    "median_income", 
+    "unemployment_rate", 
+    "metro_area_population_share", 
+    "high_school_education_share", 
+    "gini_index", 
+    "non_white_population_share"
+  ),
+  facet_args = list(nrow = 3)
+) + 
+  ggtitle("Trace Plot for MCMC Chains") +
+  theme_minimal()  # Optional: Adds a minimal theme for clarity
 ```
 
-## Diagnostics
+### Posterior Predictive Checks
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+Posterior predictive checks (Figure @fig-predictive) compares the observed density (thick black line, `y`) of the outcome variable (hate_crimes_per_100k_splc) with the densities generated from posterior predictive simulations (thin blue lines, `y_rep`). The posterior predictive checks help evaluate whether the Bayesian model accurately captures the observed data distribution.
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+- **Alignment between y and y_rep:** The observed density (black line) closely matches the simulated densities (blue lines), especially around the peak region and overall shape of the distribution. This suggests that the model successfully reproduces the key features of the observed data.
+
+- **Discrepancies**:Minor deviations between the observed and simulated densities are visible in the tails. For example: At lower values of hate crimes, the model slightly underestimates the density. At higher values, the variability in the simulated densities increases. These discrepancies might indicate areas where the model could be refined by considering additional predictors or adjusting prior distributions.
+
+- **Model Validity**: Overall, the close alignment between the observed and predicted densities suggests that the model provides a reasonable fit for the data. The high fidelity of the posterior predictive checks supports the validity of the Bayesian hierarchical model for understanding the relationship between socioeconomic factors and hate crimes.
+
+This PPC interpretation highlights the model's strength in capturing the central tendencies of the observed data while identifying potential areas for improvement in modeling extreme values.
 
 ```{r}
+#| label: fig-predictive
+#| fig-cap: Posterior predictive checks for the Bayesian hierarchical model.
 #| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
 
+library(bayesplot)
+
+pp_check(bayesian_model, plotfun = "dens_overlay") +
+  ggtitle("Posterior Predictive Check: Density Overlay") +
+  theme_minimal()
 ```
+
+
+## Implementation
+
+The model is implemented in R [@citeR] using the `rstanarm` package [@rstanarm] to perform Bayesian regression analysis. Weakly informative priors are applied to all regression coefficients to regularize estimates and reduce the risk of overfitting. Specifically, the priors for the coefficients of the predictor variables are assumed as follows:
+
+\begin{align}
+\beta_j &\sim \text{Normal}(0, 10), \quad \text{for } j = 1, 2, \ldots, 6,
+\end{align}
+
+where \(\beta_j\) represents the coefficients of the predictor variables. These priors assume that most coefficients are close to zero but allow for sufficient flexibility to detect meaningful effects when supported by the data.
+
+The intercept term follows a similar prior:
+
+\begin{align}
+\beta_0 &\sim \text{Normal}(0, 10).
+\end{align}
+
+The variance parameter for the residuals, \(\sigma^2\), is assigned a default prior provided by `rstanarm`, which assumes a weakly informative exponential distribution. This choice ensures that the variance is constrained within a reasonable range while still allowing for variability in the data.
+
+The model is fitted using Markov Chain Monte Carlo (MCMC) sampling, with default settings in `rstanarm`. These include four chains, each with 2,000 iterations (1,000 for warm-up and 1,000 for posterior sampling). The MCMC diagnostics, including trace plots and $\hat{R}$ convergence statistics, confirm that the chains have converged and that the posterior samples are reliable.
+
+All computations are performed using parallel processing to optimize runtime, leveraging the multi-core capabilities of the `rstanarm` package. The results, including posterior summaries and credible intervals, are used to quantify uncertainty in the parameter estimates and to make probabilistic inferences about the relationships between predictors and the outcome variable.
+
+
+## Insights from Model Summary
+
+- **Direction and Magnitude**: The signs and magnitudes of the coefficients provide insights into the strength and direction of each predictor's relationship with hate crimes. For example, the Gini index and unemployment rate have strong positive relationships with hate crimes, suggesting that economic instability and inequality are key drivers.
+
+- **Policy Implications**: Reducing income inequality (lower Gini index) and increasing educational attainment (higher high school education share) could potentially mitigate hate crimes.
+
+- **Statistical Significance**: The t-statistics for the coefficients indicate the strength of evidence against the null hypothesis (no effect). Predictors with high absolute t-statistics are more likely to have a meaningful impact on hate crimes.
+
+
+## Limitations
+- **State-Level Bias**: Unmeasured factors unique to each state might introduce bias.
+
+- **Data Quality**: Hate crime data may suffer from underreporting or reporting inconsistencies.
+
+- **Cross-Sectional Analysis**: The dataset represents a single year, limiting insights into temporal trends.
+
+## Alternative Models
+
+- **Logistic Regression**: Scaled hate crime data was modeled with a logistic regression. While effective for bounded data, it was less appropriate for continuous hate crime rates.
+
+- **Simple Linear Regression**: Provided insights into individual predictors but lacked the flexibility of random effects modeling.
 
 \newpage
 
