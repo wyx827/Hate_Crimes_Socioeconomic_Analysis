@@ -526,16 +526,23 @@ The model predicts hate crimes per 100,000 residents (`hate_crimes_per_100k_splc
 
 The model takes the form:
 
-\[
-\text{Hate Crimes}_i = \beta_0 + \beta_1 \cdot \text{Income}_i + \beta_2 \cdot \text{Unemployment}_i + \beta_3 \cdot \text{Population}_i + \beta_4 \cdot \text{Education}_i + \beta_5 \cdot \text{Gini}_i + \beta_6 \cdot \text{NonWhite}_i + u_i + \epsilon_i
-\]
+\begin{align}
+\text{HateCrimes}_i &= \beta_0 + \beta_1 \cdot \text{Income}_i + \beta_2 \cdot \text{Unemployment}_i + \beta_3 \cdot \text{Population}_i \\
+&\quad + \beta_4 \cdot \text{Education}_i + \beta_5 \cdot \text{Gini}_i + \beta_6 \cdot \text{NonWhite}_i + u_i + \epsilon_i,
+\end{align}
+
 
 Where:
+\begin{align}
+\beta_0 & : \text{Intercept term, representing baseline hate crime levels when all predictors are at reference values.} \tag{3} \\
+\beta_1, \beta_2,\dots, \beta_6 & : \text{Coefficients for predictors: Income (\(\beta_1\)), Unemployment (\(\beta_2\)), Population (\(\beta_3\)),} \notag \\
+& \quad \text{Education (\(\beta_4\)), Gini (\(\beta_5\)), and NonWhite (\(\beta_6\)).} \tag{4} \\
+u_i & : \text{Random effects for state-level variations, accounting for heterogeneity across states.} \tag{5} \\
+\epsilon_i & \sim \text{Normal}(0, \sigma^2) : \text{Residual error term with mean zero and variance \(\sigma^2\).} \tag{6}
+\end{align}
 
-- \(\beta_0\) is the intercept term.
-- \(\beta_1, \beta_2, \dots, \beta_6\) are coefficients for the fixed effects (predictors).
-- \(u_i\) represents the random effects for state-level variations.
-- \(\epsilon_i \sim \text{Normal}(0, \sigma^2)\) is the residual error term.
+
+
 
 ### Assumptions and Priors
 
@@ -558,33 +565,33 @@ The Bayesian hierarchical model estimates the relationship between socioeconomic
 
 ### Fixed Effects
 
-- **Intercept (\(\beta_0\))**: 
+- **Intercept ($\beta_0$)**: 
   The intercept represents the baseline predicted hate crimes per 100,000 residents when all predictors (median income, unemployment rate, metro area population share, high school education share, Gini index, and non-white population share) are at their mean or baseline values. This serves as the reference point for interpreting the effects of the predictors.
 
-- **Median Household Income (\(\beta_1\))**: 
+- **Median Household Income ($\beta_1$)**: 
   This coefficient indicates how a $1,000 increase in median household income affects the predicted hate crimes per 100,000 residents. A negative coefficient suggests that higher income is associated with fewer hate crimes, potentially reflecting improved economic stability and reduced socioeconomic tension.
 
-- **Unemployment Rate (\(\beta_2\))**: 
+- **Unemployment Rate ($\beta_2$)**: 
   This coefficient captures the effect of a 1% increase in the unemployment rate on the predicted hate crimes per 100,000 residents. A positive coefficient implies that higher unemployment is associated with more hate crimes, possibly due to heightened social stress and economic insecurity.
 
-- **Metro Area Population Share (\(\beta_3\))**: 
+- **Metro Area Population Share ($\beta_3$)**: 
   This coefficient represents the effect of a 1% increase in the proportion of residents living in metropolitan areas on the predicted hate crimes. A positive coefficient could indicate that urban areas, with their higher population density, may experience more hate crimes due to greater diversity and interpersonal interactions.
 
-- **High School Education Share (\(\beta_4\))**: 
+- **High School Education Share ($\beta_4$)**: 
   This coefficient reflects how a 1% increase in the proportion of residents with at least a high school diploma impacts the predicted hate crimes. A negative coefficient suggests that higher education levels are associated with fewer hate crimes, highlighting the role of education in promoting tolerance and reducing prejudice.
 
-- **Gini Index (\(\beta_5\))**: 
+- **Gini Index ($\beta_5$)**: 
   The Gini index measures income inequality. This coefficient shows how a 0.01 increase in the Gini index affects hate crimes. A positive coefficient indicates that higher income inequality correlates with more hate crimes, suggesting that economic disparities may contribute to social tensions.
 
-- **Non-White Population Share (\(\beta_6\))**: 
+- **Non-White Population Share ($\beta_6$)**: 
   This coefficient captures the effect of a 1% increase in the non-white population share on hate crimes. A positive coefficient may reflect increased targeting of minority groups in states with greater diversity.
 
 ### Random Effects
 
-- **State-Level Effects (\(u_i\))**: 
+- **State-Level Effects ($\u_i$)**: 
   The random effects account for state-specific variability in hate crime rates that cannot be explained by the predictors. These effects capture unobserved factors unique to each state, such as cultural, political, or enforcement differences.
 
-### Residual Variance (\(\sigma^2\))
+### Residual Variance ($\sigma^2$)
 
 The residual variance represents the variability in hate crimes not accounted for by the model. A smaller residual variance indicates that the model explains more of the variability in hate crimes.
 
@@ -592,7 +599,7 @@ The residual variance represents the variability in hate crimes not accounted fo
 
 ## Example Interpretation
 
-If the coefficient for **unemployment rate** (\(\beta_2\)) is \(0.25\), then a 1% increase in unemployment rate would lead to an increase of \(0.25\) hate crimes per 100,000 residents, holding all other predictors constant. Similarly, if the coefficient for **median household income** (\(\beta_1\)) is \(-0.05\), then a $1,000 increase in income would reduce hate crimes by \(0.05\) per 100,000 residents.
+If the coefficient for **unemployment rate** ($\beta_2$) is 0.25, then a 1% increase in unemployment rate would lead to an increase of 0.25 hate crimes per 100,000 residents, holding all other predictors constant. Similarly, if the coefficient for **median household income** ($\beta_1$) is 0.05, then a $1,000 increase in income would reduce hate crimes by  0.05 per 100,000 residents.
 
 ## Implications
 
@@ -627,6 +634,7 @@ The following are interpretations of the predictors' coefficients from the Bayes
 #| warning: false
 #| message: false
 
+# Load necessary libraries
 library(rstanarm)
 library(here)
 
@@ -646,33 +654,15 @@ posterior_summary <- apply(posterior_draws, 2, function(x) {
   )
 })
 
-# Convert to a data frame
+# Convert the summaries to a data frame
 posterior_summary_df <- as.data.frame(t(posterior_summary))
 
-# Rename columns
+# Rename columns for clarity
 colnames(posterior_summary_df) <- c("Mean", "Std. Error", "2.5% CI", "97.5% CI")
 
-# Add Parameter names as a column (if missing)
-posterior_summary_df$Parameter <- rownames(posterior_summary_df)
-
-# Filter and rearrange columns
-posterior_summary_df <- posterior_summary_df[, c("Parameter", "Mean", "Std. Error", "2.5% CI", "97.5% CI")]
-
-# Display as a formatted table
+# Display the posterior summary table without the `Parameter` column
 knitr::kable(posterior_summary_df, digits = 3, caption = "Posterior Estimates for Model Coefficients")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
 # Results {#sec-results}
 
 Our results are summarized in @tbl-modelresults.
@@ -684,7 +674,10 @@ Our results are summarized in @tbl-modelresults.
 #| message: false
 
 
+
 ```
+
+
 
 ```{r}
 #| echo: false
@@ -749,8 +742,17 @@ print(outlier_state)
 
 This visualization provides a foundational understanding of the outcome variable, setting the stage for exploring relationships with predictor variables like income inequality, unemployment, and urbanization.
 
+## Detailed predictor variables interpretations:
 
-\newpage
+- As shown in @fig-median-income, most states report median incomes between \$50,000 and \$55,000. States with lower median incomes tend to report higher rates of hate crimes, suggesting an inverse relationship. This relatively symmetric distribution suggests a moderate level of economic consistency nationwide, indicating that while individual states experience variations, there's a notable economic equilibrium. The narrow spread implies that most states maintain similar economic conditions, with fewer extremes of wealth. This uniformity could reflect national economic policies, labor market structures, and broader economic opportunities that create a somewhat standardized income environment across different regions of the United States.
+
+- As shown in @fig-unemployment, unemployment rates range from 1.6% to 8.6%. States with higher unemployment rates may experience greater economic distress, potentially influencing hate crime rates. The right skew indicates that while the majority of states maintain low unemployment levels, a few states encounter more significant employment difficulties. This pattern reveals the uneven economic recovery and structural differences across state economies. The distribution hints at underlying economic disparities, where some regions may struggle with job creation, industrial transitions, or structural economic challenges, while others maintain robust employment markets.
+
+- Metro area population share reflects the proportion of a state's population residing in metropolitan areas, with most states showing 60-70% of their population concentrated in metropolitan areas. States with higher urbanization levels may experience unique social dynamics influencing hate crime prevalence. As shown in @fig-metro-share, urbanized states report a higher concentration of hate crimes. This left-skewed distribution underscores a strong trend towards urban living, reflecting broader societal shifts in population concentration. The pattern suggests significant economic, social, and demographic transformations, where urban centers increasingly become engines of economic activity, innovation, and cultural exchange. The variation in metro population shares indicates diverse state-level characteristics, with some regions more urbanized than others, reflecting different historical, economic, and geographic development patterns.
+
+- The Gini Index measures income inequality, with higher values indicating greater disparity. As shown in @fig-gini, states clustering around 0.4-0.5, which is indicating substantial and consistent income disparities across the nation, higher Gini Index values also tend to report higher rates of hate crimes, underscoring the influence of economic inequality. This relatively symmetric distribution suggests that income inequality is a systemic issue rather than a localized phenomenon. The narrow spread implies that states experience similar patterns of wealth concentration, pointing to broader economic structures that perpetuate inequality. The Gini Index highlights the challenges of economic mobility, suggesting that regardless of geographic location, most states grapple with significant economic stratification that potentially impacts social mobility, economic opportunities, and overall societal cohesion.
+
+- This variable represents the proportion of non-white residents in each state. Higher non-white population shares may correlate with higher hate crime rates due to increased exposure to discriminatory behavior. As shown in @fig-nonwhite-share, this distribution varies significantly across states, with an average around 30-35% and a right-skewed distribution. This pattern indicates increasing racial and ethnic diversity across states, with some regions experiencing much higher proportions of non-white populations. The right skew suggests a dynamic demographic landscape, where some states are experiencing more rapid diversification than others. This distribution reflects broader societal changes, including immigration patterns, historical migration trends, and shifting cultural compositions. The variation in non-white population shares underscores the complex and evolving nature of racial and ethnic demographics in the United States, highlighting the need for nuanced understanding of social dynamics and representational challenges.
 
 # Additional Model details {#sec-model}
 
@@ -763,6 +765,8 @@ The trace plots (Figure @fig-trace) shows the Markov Chain Monte Carlo (MCMC) tr
 #| label: fig-trace
 #| fig-cap: Trace plot of MCMC chains for the Bayesian model coefficients.
 #| echo: false
+#| warning: false
+#| message: false
 
 library(bayesplot)
 library(ggplot2)
@@ -817,7 +821,7 @@ The model is implemented in R [@citeR] using the `rstanarm` package [@rstanarm] 
 \beta_j &\sim \text{Normal}(0, 10), \quad \text{for } j = 1, 2, \ldots, 6,
 \end{align}
 
-where \(\beta_j\) represents the coefficients of the predictor variables. These priors assume that most coefficients are close to zero but allow for sufficient flexibility to detect meaningful effects when supported by the data.
+where ($\beta_j$) represents the coefficients of the predictor variables. These priors assume that most coefficients are close to zero but allow for sufficient flexibility to detect meaningful effects when supported by the data.
 
 The intercept term follows a similar prior:
 
@@ -825,7 +829,7 @@ The intercept term follows a similar prior:
 \beta_0 &\sim \text{Normal}(0, 10).
 \end{align}
 
-The variance parameter for the residuals, \(\sigma^2\), is assigned a default prior provided by `rstanarm`, which assumes a weakly informative exponential distribution. This choice ensures that the variance is constrained within a reasonable range while still allowing for variability in the data.
+The variance parameter for the residuals, $\sigma^2$, is assigned a default prior provided by `rstanarm`, which assumes a weakly informative exponential distribution. This choice ensures that the variance is constrained within a reasonable range while still allowing for variability in the data.
 
 The model is fitted using Markov Chain Monte Carlo (MCMC) sampling, with default settings in `rstanarm`. These include four chains, each with 2,000 iterations (1,000 for warm-up and 1,000 for posterior sampling). The MCMC diagnostics, including trace plots and $\hat{R}$ convergence statistics, confirm that the chains have converged and that the posterior samples are reliable.
 
