@@ -13,7 +13,7 @@ The repo is structured as:
 -   `data/01-raw_data` contains the raw hate crimes dataset as obtained from [FiveThirtyEight](https://github.com/fivethirtyeight/data/tree/master/hate-crimes)
 -   `data/02-analysis_data` contains the cleaned and preprocessed dataset used for analysis.
 -   `model` contains the RDS file of the fitted models
--   `other` contains details about literature, LLM usage, supplementary materials, and sketches.
+-   `other` contains details about LLM usage and sketches.
 -   `paper` contains the files used to generate the paper, including the Quarto document and reference bibliography file, as well as the PDF of the paper. 
 -   `scripts` contains the R scripts used to simulate, download and clean data.
 
