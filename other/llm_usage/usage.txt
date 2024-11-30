@@ -1382,9 +1382,43 @@ Output Format:
 Row names now represent parameters (e.g., median_income, unemployment_rate) for better visualization.
 This update ensures the table is clean and concise, and the removal of the Parameter column simplifies the output. Let me know if you need further refinements!
 
+
 User:
+based on the reference format:"@Manual{citeR,
+    title = {{R: A Language and Environment for Statistical Computing}},
+    author = {{R Core Team}},
+    organization = {R Foundation for Statistical Computing},
+    address = {Vienna, Austria},
+    year = {2023},
+    url = {https://www.R-project.org/},
+  }", modify this reference"Gebru, Timnit, Jamie Morgenstern, Briana Vecchione, Jennifer Wortman Vaughan, Hanna Wallach, Hal Daumé Iii, and Kate Crawford. 2021. “Datasheets for Datasets.” Communi- cations of the ACM 64 (12): 86–92."
 
 ChatGPT:
+Here is the modified reference in the same format as the given example:
+
+latex
+Copy code
+@Article{datasheets,
+    title = {Datasheets for Datasets},
+    author = {Gebru, Timnit and Morgenstern, Jamie and Vecchione, Briana and Wortman Vaughan, Jennifer and Wallach, Hanna and Daumé III, Hal and Crawford, Kate},
+    journal = {Communications of the ACM},
+    volume = {64},
+    number = {12},
+    pages = {86--92},
+    year = {2021},
+    doi = {10.1145/3458723},
+}
+Explanation of Changes:
+@Article: Used because the reference is for an article in a journal.
+Fields:
+title: The title of the article.
+author: All authors listed in "Last, First" format and separated by and.
+journal: The name of the journal.
+volume: Volume number of the journal.
+number: Issue number of the journal.
+pages: Page range of the article.
+year: Year of publication.
+doi: Added DOI for proper referencing (if available).
 
 
 User:
