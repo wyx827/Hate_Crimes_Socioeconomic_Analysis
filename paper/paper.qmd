@@ -34,15 +34,15 @@ analysis_data <- read_csv(here::here("data/02-analysis_data/cleaned_hate_crimes.
 
 # Introduction
 
-Hate crimes remain a pressing societal issue in the United States, reflecting deeper social tensions and structural inequalities. Understanding the factors that contribute to hate crimes is essential for policymakers and community leaders to design effective interventions. Prior research highlights the role of socioeconomic factors, including income inequality, unemployment, and education, in shaping the prevalence of hate crimes. However, much of this work has been limited to descriptive analyses or linear regression models that may overlook the complexities of regional variations and interrelated predictors.
+Hate crimes in the United States highlight ongoing social tensions and systemic inequalities. Understanding the factors that contribute to hate crimes is essential for policymakers and community leaders to design effective interventions. Prior research highlights the role of socioeconomic factors, including income inequality, unemployment, and education, in shaping the prevalence of hate crimes. However, much of this work has been limited to descriptive analyses or linear regression models that may overlook the complexities of regional variations and interrelated predictors.
 
-This paper investigates the relationship between key socioeconomic factors and hate crime rates across the United States, employing a Bayesian hierarchical regression model. By incorporating predictors such as income inequality (Gini Index), unemployment rates, and education levels, the analysis seeks to uncover systematic patterns and regional disparities in hate crime prevalence. While previous studies have explored individual correlations, this paper provides a more nuanced understanding by controlling for regional effects and examining interactions among variables.
+This paper investigates the relationship between key socioeconomic factors and hate crime rates across the United States, employing a Bayesian hierarchical regression model. By incorporating predictors such as income inequality (Gini Index), unemployment rates, and education levels, the analysis seeks to uncover systematic patterns and regional disparities in hate crime prevalence. While previous studies have explored individual correlations, this paper provides a more detailed understanding by controlling for regional effects and examining interactions among variables.
 
-The estimand in this analysis represents the expected influence of socioeconomic factors—income inequality, unemployment, education, and others—on hate crime rates, controlling for regional variations. Specifically, it aims to estimate how changes in these predictors are associated with the rate of hate crimes per 100,000 residents across different states. This estimand reflects the underlying causal relationship between these factors and hate crimes, allowing for a deeper understanding of the drivers of social conflict. While the true estimand is unknown, this study approximates it through model assumptions and available data, providing insights into how socioeconomic conditions contribute to hate crime dynamics.
+The estimand in this analysis represents the expected influence of socioeconomic factors—income inequality, unemployment, education, and others—on hate crime rates, controlling for regional variations. Specifically, it aims to estimate how changes in these predictors are associated with the rate of hate crimes per 100,000 residents across different states. This estimand reflects the underlying causal relationship between these factors and hate crimes, allowing for a deeper understanding of the drivers of social conflict. While the true estimand is unknown, this study approximates it through model assumptions and available data, clarify how socioeconomic conditions contribute to hate crime dynamics.
 
-The analysis identifies significant relationships between income inequality, unemployment, and education with hate crime rates, highlighting the importance of addressing these factors in policy and practice. States with higher income inequality and unemployment rates exhibit elevated hate crime levels, while those with higher education levels tend to have fewer hate crimes. Median household income, however, showed negligible effects, suggesting that wealth distribution may matter more than absolute wealth in this context. These findings underscore the role of socioeconomic disparities in fostering social tensions and the potential of education to mitigate such conflicts.
+The analysis finds that income inequality, unemployment, and education levels significantly correlate with hate crime rates, suggesting these factors should guide policy decisions. States with higher income inequality and unemployment rates exhibit elevated hate crime levels, while those with higher education levels tend to have fewer hate crimes. Median household income, however, showed negligible effects, suggesting that wealth distribution may matter more than absolute wealth in this context. These findings underscore the role of socioeconomic disparities in fostering social tensions and the potential of education to mitigate such conflicts.
 
-This paper proceeds as follows: Section 2 describes the data and methodology, detailing the Bayesian hierarchical regression model used for analysis. Section 3 presents the results,  Section 4 discusses the findings in the context of existing literature and their implications for policy. Finally, Section 5 outlines the limitations of the study and suggests directions for future research. This structure ensures a comprehensive understanding of how socioeconomic factors influence hate crimes in the United States, providing a foundation for actionable policy recommendations.
+This paper proceeds as follows: Section 2 describes the data and methodology, detailing the Bayesian hierarchical regression model used for analysis. Section 3 presents the results,  Section 4 discusses the findings in the context of existing literature and their implications for policy. Finally, Section 5 outlines the limitations of the study and suggests directions for future research. This structure ensures a thorough understanding of how socioeconomic factors influence hate crimes in the United States, providing a foundation for actionable policy recommendations.
 
 The remainder of this paper is structured as follows. @sec-data describes the dataset, variables, and preprocessing steps. @sec-modelsetup outlines the methodological framework, including the Bayesian hierarchical model. @sec-results  presents the results, including visualizations of key relationships between predictors and hate crime rates. @sec-discussion discusses the key findings, implications, limitations, and potential future directions of the analysis. @sec-Appendix concludes with additional details of data, model and results
 
@@ -68,21 +68,21 @@ Hate crime incidents, as complex social phenomena, are quantified in the dataset
 Socioeconomic conditions are represented through variables such as `gini_index` (income inequality), `unemployment_rate`, and `high_school_education_share`. These variables serve as proxies for broader structural and economic conditions. Data were collected from government sources, harmonized by FiveThirtyEight, and standardized to ensure consistency across states. For example, the `metro_area_population_share` variable quantifies the proportion of a state's population living in metropolitan areas, capturing the urban-rural divide, while `median_income` reflects the central tendency of economic resources in a state.
 
 ### Challenges in Measurement  
-Although the dataset provides a comprehensive snapshot of socioeconomic conditions and hate crimes, several challenges arise:  
+Although the dataset provides a thorough snapshot of socioeconomic conditions and hate crimes, several challenges arise:  
 - **Underreporting and Enforcement Bias**: Hate crime reporting is influenced by state-level enforcement practices and transparency. States with more proactive reporting may show artificially higher rates of hate crimes, complicating the interpretation of these data as direct reflections of prevalence.  
 - **Interactions with Unmeasured Factors**: Variables such as `non_white_population_share` may interact with cultural, political, or institutional factors not captured in the dataset, adding complexity to causal interpretations.  
-- **Aggregation Issues**: State-level aggregation masks within-state variations, such as disparities between urban and rural areas. For instance, socioeconomic conditions and hate crime reporting may differ significantly within a state, but such nuances are not reflected in the aggregated data.
+- **Aggregation Issues**: State-level aggregation masks within-state variations, such as disparities between urban and rural areas. For instance, socioeconomic conditions and hate crime reporting may differ significantly within a state, but such distinctions are not reflected in the aggregated data.
 
 ### Temporal and Validation Considerations  
-The dataset represents a single-year snapshot, limiting the ability to analyze trends or temporal changes. While standardization ensures consistency across states, this cross-sectional view cannot capture the dynamics of hate crimes over time. Moreover, the lack of granular data, such as city- or county-level statistics, constrains the depth of analysis by preventing exploration of localized patterns.
+The dataset represents a single-year snapshot, limiting the ability to analyze trends or temporal changes. While standardization ensures consistency across states, this cross-sectional view cannot capture the dynamics of hate crimes over time. Moreover, the lack of granular data, such as city- or county-level statistics, constrains the depth of analysis by preventing examination of localized patterns.
 
-In summary, while the dataset provides robust and standardized measures of hate crimes and socioeconomic conditions, limitations such as potential biases, aggregation effects, and the lack of temporal granularity must be acknowledged. These considerations are crucial for interpreting the relationships identified in the analysis and for framing conclusions within the broader context of societal dynamics.
+In summary, while the dataset provides robust and standardized measures of hate crimes and socioeconomic conditions, limitations such as potential biases, aggregation effects, and the lack of temporal granularity must be acknowledged. These considerations are essential for interpreting the relationships identified in the analysis and for framing conclusions within the broader context of societal dynamics.
 
 ---
 
 ## Variables of Interest
 
-This section introduces the dataset's key variables, including detailed descriptions, visualizations, and insights into their relevance. Visualizations illustrate distributions, relationships, and variability to contextualize their potential influence on hate crime rates.
+This section introduces the dataset's key variables, including detailed descriptions, visualizations, and views into their relevance. Visualizations illustrate distributions, relationships, and variability to contextualize their potential influence on hate crime rates.
 
 ### Outcome Variable: Hate Crimes Per 100k SPLC
 
@@ -90,7 +90,7 @@ The outcome variable, representing the number of hate crimes per 100,000 residen
 
 ```{r}
 #| label: fig-hate-crimes
-#| fig-cap: Distribution of hate crimes per 100,000 residents, as reported by the SPLC, illustrating state-level variation. Most states report between 0.1 and 0.5 hate crimes per 100,000 residents, with a notable outlier indicating a disproportionately higher hate crime rate.
+#| fig-cap: State-level variation in hate crimes per 100,000 residents shows most states report low rates, with a few outliers reflecting higher incidence.
 #| echo: false
 #| warning: false
 #| message: false
@@ -272,7 +272,7 @@ ggplot(analysis_data %>% filter(unemployment_rate >= 0 & unemployment_rate <= 10
 
 ### Metro Area Population Share
 
-Metro area population share reflects the proportion of a state's population residing in metropolitan areas, which means states with higher urbanization levels may experience unique social dynamics influencing hate crime prevalence. As shown in @fig-metro-share, it shares reveals that the majority of states have a population share in metro areas concentrated around 0.77, with a standard deviation of 0.2. This suggests that many states have a high proportion of their populations in metropolitan areas, reflecting the urban-centric population distribution and possibly highlighting urbanization trends in the U.S.
+Metro area population share reflects the proportion of a state's population residing in metropolitan areas, which means states with higher urbanization levels may experience unique social dynamics influencing hate crime prevalence. As shown in @fig-metro-share, it shares shows that the majority of states have a population share in metro areas concentrated around 0.77, with a standard deviation of 0.2. This suggests that many states have a high proportion of their populations in metropolitan areas, reflecting the urban-centric population distribution and possibly highlighting urbanization trends in the U.S.
 ```{r}
 #| label: fig-metro-share
 #| fig-cap: Distribution of metro area population share for states, showing the extent to which populations are concentrated in metropolitan areas. Most states have metro area shares clustered around 0.77, indicating a high proportion of urbanized population.
@@ -521,7 +521,7 @@ Alternative models were considered, including:
 
 The **Bayesian hierarchical model** was selected as it provides the flexibility to model the complex relationships between hate crimes and predictors while considering the state-level effects.
 
-Model diagnostics, implementation details, insights from the model summary, limitations, and alternative models considered are comprehensively documented in [Appendix -@sec-model], ensuring transparency and replicability of the analysis.
+Model diagnostics, implementation details, opinions from the model summary, limitations, and alternative models considered are thoroughly documented in [Appendix -@sec-model], ensuring transparency and replicability of the analysis.
 
 ## Bayesian Hierarchical Model Overview
 
@@ -614,7 +614,7 @@ If the coefficient for **unemployment rate** ($\beta_2$) is 0.25, then a 1% incr
 
 ## Implications
 
-The coefficients provide insights into how socioeconomic factors impact hate crimes. For example:
+The coefficients clarify how socioeconomic factors impact hate crimes. For example:
 
 - Policies targeting economic inequality (reducing the Gini index) and increasing educational attainment may help reduce hate crimes.
 - Urbanization and population diversity may require targeted interventions to address potential tensions.
@@ -624,15 +624,15 @@ These interpretations guide the understanding of how predictors influence hate c
 
 ## Model Justification
 
-Based on the model summary shown in @tbl-top-predictors, we observe that several predictors—such as `gini_index`, `unemployment_rat`e, and `high_school_education_share` — exhibit significant effects on hate crime rates, providing meaningful insights into the socioeconomic factors influencing these outcomes. The inclusion of state-level random effects captures regional variations that would otherwise be overlooked in a purely fixed-effects model.
+Based on the model summary shown in @tbl-top-predictors, we observe that several predictors—such as `gini_index`, `unemployment_rat`e, and `high_school_education_share` — exhibit significant effects on hate crime rates, clarify the socioeconomic factors influencing these outcomes. The inclusion of state-level random effects captures regional variations that would otherwise be overlooked in a purely fixed-effects model.
 
-The rationale for applying a Bayesian hierarchical model in this context is to account for the complex relationships between socioeconomic factors and hate crimes while addressing variations across states. This model allows us to incorporate both fixed effects for predictors—such as income, unemployment rate, and population composition—and random effects to capture state-level heterogeneity. This hierarchical approach provides a nuanced understanding of how both individual predictors and broader state-level factors influence hate crimes.
+The rationale for applying a Bayesian hierarchical model in this context is to account for the complex relationships between socioeconomic factors and hate crimes while addressing variations across states. This model allows us to incorporate both fixed effects for predictors—such as income, unemployment rate, and population composition—and random effects to capture state-level heterogeneity. This hierarchical approach provides a detailed understanding of how both individual predictors and broader state-level factors influence hate crimes.
 
 By simultaneously modeling these effects, we can isolate the individual impact of each predictor while accounting for unobserved heterogeneity among states. For example, the inclusion of random intercepts for states accounts for differences in reporting standards, enforcement, and other contextual factors that may influence hate crime rates.
 
 Additionally, the Bayesian framework allows for the incorporation of prior knowledge through weakly informative priors, helping to regularize estimates and prevent overfitting, especially given the relatively small dataset. This is particularly important in ensuring that the model's predictions are generalizable beyond the data used for training.
 
-The model outputs, including posterior summaries and credible intervals, provide a robust measure of the uncertainty around each estimate, offering insights into the strength and direction of relationships between predictors and hate crime rates. The full coefficient output and diagnostic checks are shown in the [Appendix - @sec-model].
+The model outputs, including posterior summaries and credible intervals, provide a robust measure of the uncertainty around each estimate, and clarify the strength and direction of relationships between predictors and hate crime rates. The full coefficient output and diagnostic checks are shown in the [Appendix - @sec-model].
 
 ```{r}
 #| echo: false
@@ -701,13 +701,13 @@ knitr::kable(
 
 ## State-Level Effects
 
-To understand regional differences in hate crime rates across the United States, I plotted the state-level random effects($\u_i$) using a geographic map.@fig-combined-map provides a comprehensive visualization of the spatial distribution of hate crimes and metro population share across U.S. states. The key aspects of this map are:
+To understand regional differences in hate crime rates across the United States, I plotted the state-level random effects($\u_i$) using a geographic map.@fig-combined-map provides a thorough visualization of the spatial distribution of hate crimes and metro population share across U.S. states. The key aspects of this map are:
 
 - **Hate Crimes (Color Intensity)**:
-The blue color gradient represents the scaled rates of hate crimes per 100,000 residents. States with darker blue shades indicate higher levels of hate crimes, while lighter shades represent lower levels. This visual representation reveals distinct geographic trends, with certain states (e.g., in the Midwest and South) exhibiting higher levels of hate crimes, potentially reflecting regional socio-political or cultural factors. The variation in hate crime intensities across states reflects broader patterns of societal conflict and regional tensions. As Levin[@levin2017] argues, hate crime rates are not randomly distributed but deeply embedded in complex social dynamics that vary significantly across geographic regions.
+The blue color gradient represents the scaled rates of hate crimes per 100,000 residents. States with darker blue shades indicate higher levels of hate crimes, while lighter shades represent lower levels. This visual representation shows distinct geographic trends, with certain states (e.g., in the Midwest and South) exhibiting higher levels of hate crimes, potentially reflecting regional socio-political or cultural factors. The variation in hate crime intensities across states reflects broader patterns of societal conflict and regional tensions. As Levin[@levin2017] argues, hate crime rates are not randomly distributed but deeply embedded in complex social dynamics that vary significantly across geographic regions.
 
 - **Metro Population Share (Circle Size)**:
-The red circles overlaid on the map indicate the metro population share for each state. Larger circles represent states where a significant portion of the population resides in metropolitan areas. Conversely, smaller circles correspond to states with a lower metro population share. For instance, states like California and New York have larger circles, signifying their high metro population shares, while states such as Wyoming and Vermont have smaller circles. The relationship between metropolitan population share and hate crime rates is nuanced and multifaceted. Lee[@lee2018] suggests that urban population composition plays a critical role in understanding social dynamics, indicating that metro population share is not a simple predictor but a complex indicator of potential social interactions and tensions.
+The red circles overlaid on the map indicate the metro population share for each state. Larger circles represent states where a significant portion of the population resides in metropolitan areas. Conversely, smaller circles correspond to states with a lower metro population share. For instance, states like California and New York have larger circles, signifying their high metro population shares, while states such as Wyoming and Vermont have smaller circles. The relationship between metropolitan population share and hate crime rates is detailed and complex. Lee[@lee2018] suggests that urban population composition plays a significant role in understanding social dynamics, indicating that metro population share is not a simple predictor but a complex indicator of potential social interactions and tensions.
 
 - **Regional Patterns**:
 A noticeable pattern emerges where states with higher metro population shares (larger circles) do not necessarily align with the states experiencing the highest rates of hate crimes. This suggests that metro population share might not be directly correlated with hate crime rates but could interact with other factors such as socioeconomic conditions or state-level policies. The observed regional patterns of hate crimes cannot be understood through a singular lens. Green et al.[@green2013] emphasize that geographic variations in hate crime rates are influenced by intersecting factors of social, economic, and cultural complexity, challenging simplistic interpretations of regional differences.
@@ -798,7 +798,7 @@ print(map_data)
 
 The Gini index ($\beta_5$) demonstrates a positive and statistically significant association with hate crimes. @fig-gini-scatter illustrates this relationship, showing a clear upward trend between the Gini index and hate crimes per 100,000 residents. States with higher Gini index values, such as the District of Columbia, exhibit elevated hate crime rates, suggesting that inequality may foster social tensions and conflict. Conversely, states with lower Gini index values, such as Minnesota and Louisiana, tend to experience fewer hate crimes.The positive correlation between income inequality and hate crimes aligns with broader findings that social and economic disparities exacerbate tensions, contributing to higher levels of interpersonal and community-level conflict [@Miller2020].
 
-The data also reveals that while income inequality is a significant predictor, the distribution of hate crimes is not uniform. For instance, states like Massachusetts and Oregon, with moderately high Gini indices, exhibit varying hate crime intensities, highlighting the role of additional contextual factors such as demographics, policies, or community-level dynamics.
+The data also shows that while income inequality is a significant predictor, the distribution of hate crimes is not uniform. For instance, states like Massachusetts and Oregon, with moderately high Gini indices, exhibit varying hate crime intensities, highlighting the role of additional contextual factors such as demographics, policies, or community-level dynamics.
 
 ```{r}
 #| echo: false
@@ -897,10 +897,10 @@ ggplot(analysis_data, aes(x = unemployment_rate, y = hate_crimes_per_100k_splc))
 
 ## Education Levels
 
-Higher high school education levels ($\beta_4$) are significantly associated with fewer hate crimes. The purple dashed line in @fig-education-scatter suggests a nuanced trend between high school education share and hate crime rates per 100,000 residents. While states with higher education levels generally exhibit lower hate crime rates, there are notable variations. This trend highlights the complex role education plays in mitigating social tensions, supporting findings that suggest education can be a protective factor against prejudice but does not operate in isolation.
+Higher high school education levels ($\beta_4$) are significantly associated with fewer hate crimes. The purple dashed line in @fig-education-scatter suggests a detailed trend between high school education share and hate crime rates per 100,000 residents. While states with higher education levels generally exhibit lower hate crime rates, there are notable variations. This trend highlights the complex role education plays in mitigating social tensions, supporting findings that suggest education can be a protective factor against prejudice but does not operate in isolation.
 
 - **Trend Analysis**: 
-The scatter plot illustrates a nuanced relationship between education levels and hate crime rates. States with higher education shares tend to show slightly reduced hate crimes, although the relationship is not strictly linear. This supports the idea that education fosters social cohesion, but other mediating factors may influence outcomes. The findings align with research by Dawson and Ramirez (2023), which underscores the importance of education as a tool for fostering social understanding while highlighting its limitations when isolated from broader social policies [@Dawson2023].
+The scatter plot illustrates a detailed relationship between education levels and hate crime rates. States with higher education shares tend to show slightly reduced hate crimes, although the relationship is not strictly linear. This supports the idea that education fosters social cohesion, but other mediating factors may influence outcomes. The findings align with research by Dawson and Ramirez (2023), which underscores the importance of education as a tool for fostering social understanding while highlighting its limitations when isolated from broader social policies [@Dawson2023].
 
 - **Regional Highlights**:
 Low Education States: States like Mississippi and Alabama with lower education shares report relatively low hate crime rates, potentially due to underreporting or differing regional social dynamics.
@@ -1004,29 +1004,29 @@ ggplot(analysis_data, aes(x = median_income, y = hate_crimes_per_100k_splc)) +
 
 ## Key Findings
 
-This study examines the relationship between socioeconomic factors and hate crimes in the United States using a Bayesian hierarchical regression model. The analysis reveals significant associations between key predictors—such as income inequality, unemployment, and education levels—and hate crime rates. Regional disparities are evident, with some states exhibiting consistently higher or lower baseline hate crime rates, even after accounting for these predictors.
+This study examines the relationship between socioeconomic factors and hate crimes in the United States using a Bayesian hierarchical regression model. The analysis shows significant associations between key predictors—such as income inequality, unemployment, and education levels—and hate crime rates. Regional disparities are evident, with some states exhibiting consistently higher or lower baseline hate crime rates, even after accounting for these predictors.
 
 Income inequality, measured by the Gini Index, and unemployment rates emerged as strong predictors of hate crime prevalence. States with greater income inequality and higher unemployment rates were found to have elevated levels of hate crimes, suggesting that economic instability and social stratification may contribute to social tensions. Conversely, education levels, particularly the proportion of residents with a high school education, were negatively associated with hate crime rates, indicating a potential mitigating role of education in fostering social cohesion. However, median household income was found to have a negligible impact on hate crime rates, indicating that general economic wealth alone may not be a sufficient predictor of such crimes. This finding highlights the importance of considering the distribution of economic resources and broader socioeconomic conditions rather than focusing solely on aggregate income levels.
 
 ## Implications for Societal Dynamics
 
-The findings highlight the critical role of socioeconomic disparities, particularly income inequality and unemployment, in shaping hate crime prevalence. Higher levels of inequality and unemployment appear to exacerbate social conflict, contributing to increased hate crime rates. This aligns with research suggesting that economic instability fosters social tension and undermines social cohesion. Policies aimed at promoting equitable resource distribution and improving economic stability could yield positive ripple effects on social harmony. Similarly, investments in education, particularly in underserved communities, may serve as preventative measures by fostering tolerance and critical thinking. States with higher education levels, such as Minnesota and Washington, demonstrate fewer hate crimes, indicating that education can act as a protective factor.
+The findings highlight the significant role of socioeconomic disparities, particularly income inequality and unemployment, in shaping hate crime prevalence. Higher levels of inequality and unemployment appear to exacerbate social conflict, contributing to increased hate crime rates. This aligns with research suggesting that economic instability fosters social tension and undermines social cohesion. Policies aimed at promoting equitable resource distribution and improving economic stability could yield positive ripple effects on social harmony. Similarly, investments in education, particularly in underserved communities, may serve as preventative measures by fostering tolerance and significant thinking. States with higher education levels, such as Minnesota and Washington, demonstrate fewer hate crimes, indicating that education can act as a protective factor.
 
 Regional disparities in hate crime rates underscore the importance of tailoring policies to state-specific characteristics. For instance, areas with higher income inequality, such as the District of Columbia, exhibited disproportionately higher hate crime rates. In contrast, states with relatively low inequality, such as Minnesota and Washington, experienced fewer hate crimes, suggesting that local policies and cultural dynamics can mitigate social conflict. Policymakers should craft interventions that address the unique socioeconomic profiles of their regions, focusing on the root causes of hate crimes rather than merely their symptoms.
 
-Urbanization also presents unique challenges and opportunities. While metro population share was not directly associated with hate crime rates, its interaction with other factors such as unemployment and education levels reveals complex dynamics. Urban areas, characterized by diversity and dense populations, may foster cultural exchange but also necessitate strategies to mitigate social tensions. Policymakers should consider the social and economic realities of urban environments when designing interventions.
+Urbanization also presents unique challenges and opportunities. While metro population share was not directly associated with hate crime rates, its interaction with other factors such as unemployment and education levels shows complex dynamics. Urban areas, characterized by diversity and dense populations, may foster cultural exchange but also necessitate strategies to mitigate social tensions. Policymakers should consider the social and economic realities of urban environments when designing interventions.
 
-Addressing these interconnected factors will require a comprehensive approach that integrates economic, educational, and regional strategies. By focusing on reducing income inequality, improving economic stability, and enhancing access to education, policymakers and community leaders can foster a safer and more inclusive society. Additionally, exploring the role of urban dynamics and tailoring policies to regional contexts can help mitigate hate crimes and promote social cohesion across diverse communities.
+Reducing hate crimes necessitates an integrated approach, combining economic, educational, and regional strategies. By focusing on reducing income inequality, improving economic stability, and enhancing access to education, policymakers and community leaders can foster a safer and more inclusive society. Additionally, exploring the role of urban dynamics and tailoring policies to regional contexts can help mitigate hate crimes and promote social cohesion across diverse communities.
 
 ## Limitations of the Analysis
 
 The analysis faces several limitations that constrain the interpretability and applicability of the findings. The reliance on cross-sectional data precludes definitive causal inferences. While strong correlations are observed between predictors such as income inequality and unemployment with hate crime rates, it remains uncertain whether these factors directly contribute to higher hate crimes or if unmeasured variables, such as political polarization, cultural differences, or social media influence, play a more substantial role.
 
-Aggregating data at the state level presents another limitation, as it obscures intra-state variations. This approach fails to capture critical differences between urban, suburban, and rural areas, where economic conditions, law enforcement practices, and social dynamics can vary significantly. For example, metropolitan centers may experience hate crimes driven by different factors than those in less densely populated regions, but this nuance is lost in state-level summaries. The aggregation thus simplifies the diverse social and economic landscapes within states, reducing the model’s ability to reflect localized dynamics.
+Aggregating data at the state level presents another limitation, as it obscures intra-state variations. This approach fails to capture significant differences between urban, suburban, and rural areas, where economic conditions, law enforcement practices, and social dynamics can vary significantly. For example, metropolitan centers may experience hate crimes driven by different factors than those in less densely populated regions, but this distinction is lost in state-level summaries. The aggregation thus simplifies the diverse social and economic landscapes within states, reducing the model’s ability to reflect localized dynamics.
 
-The assumption of linear relationships between predictors and hate crimes is another constraint. Real-world phenomena often involve non-linear interactions and feedback loops that cannot be captured by the current model. For instance, the relationship between unemployment and hate crimes may intensify at certain thresholds or diminish under specific social support structures, nuances that are overlooked in a linear framework.
+The assumption of linear relationships between predictors and hate crimes is another constraint. Real-world phenomena often involve non-linear interactions and feedback loops that cannot be captured by the current model. For instance, the relationship between unemployment and hate crimes may intensify at certain thresholds or diminish under specific social support structures, distinctions that are overlooked in a linear framework.
 
-The exclusion of demographic and political variables limits the comprehensiveness of the analysis. Factors such as race, ethnicity, age, and political affiliation likely play critical roles in hate crime dynamics, yet their absence from the model restricts deeper insights. For instance, demographic diversity within urban centers or the political leanings of specific regions could influence hate crime rates in ways that remain unexplored. Similarly, the metro population share, treated as a singular variable, oversimplifies the complexity of urban environments, failing to account for variations in cultural diversity, economic inequality, or law enforcement resources within cities.
+The exclusion of demographic and political variables limits the thoroughness of the analysis. Factors such as race, ethnicity, age, and political affiliation likely play significant roles in hate crime dynamics, yet their absence from the model restricts deeper views For instance, demographic diversity within urban centers or the political leanings of specific regions could influence hate crime rates in ways that remain unexplored. Similarly, the metro population share, treated as a singular variable, oversimplifies the complexity of urban environments, failing to account for variations in cultural diversity, economic inequality, or law enforcement resources within cities.
 
 ## Weaknesses and next steps
 
@@ -1034,7 +1034,7 @@ The analysis faces limitations in accounting for dynamic and temporal factors th
 
 To address these weaknesses, future research should prioritize incorporating temporal datasets to analyze changes in hate crimes over time, especially in response to major societal events. Including additional demographic and political predictors—such as race, ethnicity, age, and political affiliation—could provide a deeper understanding of hate crime dynamics. Furthermore, using more granular geographic data at the city or county level would better capture localized variations and reduce the oversimplification inherent in state-level analyses.
 
-Additionally, exploring non-linear modeling approaches could uncover complex interactions and thresholds in the relationships between predictors and hate crimes. For instance, the influence of unemployment or income inequality may intensify or diminish depending on other social conditions, which are overlooked in the current linear framework. Investigating these interaction effects, along with community-level intervention strategies, could pave the way for a more nuanced understanding of the underlying factors contributing to hate crimes and inform more targeted and effective policies.
+Additionally, exploring non-linear modeling approaches could uncover complex interactions and thresholds in the relationships between predictors and hate crimes. For instance, the influence of unemployment or income inequality may intensify or diminish depending on other social conditions, which are overlooked in the current linear framework. Investigating these interaction effects, along with community-level intervention strategies, could pave the way for a more detailed understanding of the underlying factors contributing to hate crimes and inform more targeted and effective policies.
 
 \newpage
 
@@ -1044,7 +1044,7 @@ Additionally, exploring non-linear modeling approaches could uncover complex int
 
 ## Objective and Overview
 
-The aim of this appendix is to critically assess the data collection methods, sampling approach, and observational considerations related to the socioeconomic analysis of hate crimes. By examining the methodology in depth, we aim to validate the representativeness and robustness of the dataset and address inherent challenges in observational data, particularly concerning biases in underreporting and geographic variations.
+The aim of this appendix is to assess the data collection methods, sampling approach, and observational considerations related to the socioeconomic analysis of hate crimes. By examining the methodology in depth, we aim to validate the representativeness and robustness of the dataset and address inherent challenges in observational data, particularly concerning biases in underreporting and geographic variations.
 
 ## Core Objectives
 
@@ -1064,7 +1064,7 @@ The dataset used in this study aggregates state-level statistics on hate crimes,
 
 - Socioeconomic data derived from government records and standardized by FiveThirtyEight, covering variables like Gini Index and metro area population share.
 
-These data sources provide a comprehensive view of state-level trends, but they remain subject to sampling and reporting challenges
+These data sources provide a thorough view of state-level trends, but they remain subject to sampling and reporting challenges
 
 ### Challenges in Representativeness
 
@@ -1093,7 +1093,7 @@ Data from the SPLC and FiveThirtyEight rely on third-party reporting and standar
 
 - **Hate Crime Reporting**: Hate crime data from the SPLC and FBI often rely on third-party reporting. Victims’ reluctance to report incidents due to fear of retaliation or mistrust in law enforcement can result in underreporting, a common challenge in hate crime research.
 
-- **Socioeconomic Data**: Metrics like the Gini Index provide valuable insights into inequality but fail to capture short-term economic shocks or rapid social changes that may influence hate crime rates.
+- **Socioeconomic Data**: Metrics like the Gini Index provide meaningful observations into inequality but fail to capture short-term economic shocks or rapid social changes that may influence hate crime rates.
 
 ### Survey Design for Future Studies
 
@@ -1195,17 +1195,17 @@ State-level data do not account for intra-state heterogeneity. For example:
 
 - **Urban vs. Rural Variations**: Urban centers may have higher hate crime rates due to greater population density and heterogeneity, whereas rural areas may experience different patterns of social conflict.
 
-- **Policy Implications**: Disaggregating data by metropolitan statistical areas (MSAs) could provide actionable insights for policymakers.
+- **Policy Implications**: Disaggregating data by metropolitan statistical areas (MSAs) could provide actionable observations for policymakers.
 
 ### Implications for Policy and Research
 
-1. **Granular Data Collection**: Collecting city- and county-level hate crime data can provide actionable insights into localized patterns.
+1. **Granular Data Collection**: Collecting city- and county-level hate crime data can provide actionable observations into localized patterns.
 2. **Dynamic Modeling**: Incorporate time-series data to analyze how hate crime rates respond to socioeconomic changes or political events.
 3. **Expanded Demographic Metrics**: Include race, age, and political affiliation to understand the broader context of hate crime dynamics.
 
 ## Conclusion
 
-The methodology employed in this study highlights critical gaps in the measurement and analysis of hate crimes and their socioeconomic determinants. Future research should prioritize granularity, temporal analysis, and expanded demographic considerations to improve the reliability and applicability of findings. By addressing these methodological limitations, researchers can contribute to more effective policy interventions aimed at reducing hate crimes.
+The methodology employed in this study highlights significant gaps in the measurement and analysis of hate crimes and their socioeconomic determinants. Future research should prioritize granularity, temporal analysis, and expanded demographic considerations to improve the reliability and applicability of findings. Addressing these methodological gaps can enhance policy interventions to mitigate hate crimes.
 
 
 
@@ -1247,13 +1247,13 @@ This visualization provides a foundational understanding of the outcome variable
 
 - As shown in @fig-median-income, most states report median incomes between \$50,000 and \$55,000. States with lower median incomes tend to report higher rates of hate crimes, suggesting an inverse relationship. This relatively symmetric distribution suggests a moderate level of economic consistency nationwide, indicating that while individual states experience variations, there's a notable economic equilibrium. The narrow spread implies that most states maintain similar economic conditions, with fewer extremes of wealth. This uniformity could reflect national economic policies, labor market structures, and broader economic opportunities that create a somewhat standardized income environment across different regions of the United States.
 
-- As shown in @fig-unemployment, unemployment rates range from 1.6% to 8.6%. States with higher unemployment rates may experience greater economic distress, potentially influencing hate crime rates. The right skew indicates that while the majority of states maintain low unemployment levels, a few states encounter more significant employment difficulties. This pattern reveals the uneven economic recovery and structural differences across state economies. The distribution hints at underlying economic disparities, where some regions may struggle with job creation, industrial transitions, or structural economic challenges, while others maintain robust employment markets.
+- As shown in @fig-unemployment, unemployment rates range from 1.6% to 8.6%. States with higher unemployment rates may experience greater economic distress, potentially influencing hate crime rates. The right skew indicates that while the majority of states maintain low unemployment levels, a few states encounter more significant employment difficulties. This pattern shows the uneven economic recovery and structural differences across state economies. The distribution hints at underlying economic disparities, where some regions may struggle with job creation, industrial transitions, or structural economic challenges, while others maintain robust employment markets.
 
 - Metro area population share reflects the proportion of a state's population residing in metropolitan areas, with most states showing 60-70% of their population concentrated in metropolitan areas. States with higher urbanization levels may experience unique social dynamics influencing hate crime prevalence. As shown in @fig-metro-share, urbanized states report a higher concentration of hate crimes. This left-skewed distribution underscores a strong trend towards urban living, reflecting broader societal shifts in population concentration. The pattern suggests significant economic, social, and demographic transformations, where urban centers increasingly become engines of economic activity, innovation, and cultural exchange. The variation in metro population shares indicates diverse state-level characteristics, with some regions more urbanized than others, reflecting different historical, economic, and geographic development patterns.
 
 - The Gini Index measures income inequality, with higher values indicating greater disparity. As shown in @fig-gini, states clustering around 0.4-0.5, which is indicating substantial and consistent income disparities across the nation, higher Gini Index values also tend to report higher rates of hate crimes, underscoring the influence of economic inequality. This relatively symmetric distribution suggests that income inequality is a systemic issue rather than a localized phenomenon. The narrow spread implies that states experience similar patterns of wealth concentration, pointing to broader economic structures that perpetuate inequality. The Gini Index highlights the challenges of economic mobility, suggesting that regardless of geographic location, most states grapple with significant economic stratification that potentially impacts social mobility, economic opportunities, and overall societal cohesion.
 
-- This variable represents the proportion of non-white residents in each state. Higher non-white population shares may correlate with higher hate crime rates due to increased exposure to discriminatory behavior. As shown in @fig-nonwhite-share, this distribution varies significantly across states, with an average around 30-35% and a right-skewed distribution. This pattern indicates increasing racial and ethnic diversity across states, with some regions experiencing much higher proportions of non-white populations. The right skew suggests a dynamic demographic landscape, where some states are experiencing more rapid diversification than others. This distribution reflects broader societal changes, including immigration patterns, historical migration trends, and shifting cultural compositions. The variation in non-white population shares underscores the complex and evolving nature of racial and ethnic demographics in the United States, highlighting the need for nuanced understanding of social dynamics and representational challenges.
+- This variable represents the proportion of non-white residents in each state. Higher non-white population shares may correlate with higher hate crime rates due to increased exposure to discriminatory behavior. As shown in @fig-nonwhite-share, this distribution varies significantly across states, with an average around 30-35% and a right-skewed distribution. This pattern indicates increasing racial and ethnic diversity across states, with some regions experiencing much higher proportions of non-white populations. The right skew suggests a dynamic demographic landscape, where some states are experiencing more rapid diversification than others. This distribution reflects broader societal changes, including immigration patterns, historical migration trends, and shifting cultural compositions. The variation in non-white population shares underscores the complex and evolving nature of racial and ethnic demographics in the United States, highlighting the need for detailed understanding of social dynamics and representational challenges.
 
 # Additional Model details {#sec-model}
 
@@ -1377,9 +1377,9 @@ The model is fitted using Markov Chain Monte Carlo (MCMC) sampling, with default
 All computations are performed using parallel processing to optimize runtime, leveraging the multi-core capabilities of the `rstanarm` package. The results, including posterior summaries and credible intervals, are used to quantify uncertainty in the parameter estimates and to make probabilistic inferences about the relationships between predictors and the outcome variable.
 
 
-## Insights from Model Summary
+## Observations from Model Summary
 
-- **Direction and Magnitude**: The signs and magnitudes of the coefficients provide insights into the strength and direction of each predictor's relationship with hate crimes. For example, the Gini index and unemployment rate have strong positive relationships with hate crimes, suggesting that economic instability and inequality are key drivers.
+- **Direction and Magnitude**: The signs and magnitudes of the coefficients clarify the strength and direction of each predictor's relationship with hate crimes. For example, the Gini index and unemployment rate have strong positive relationships with hate crimes, suggesting that economic instability and inequality are key drivers.
 
 - **Policy Implications**: Reducing income inequality (lower Gini index) and increasing educational attainment (higher high school education share) could potentially mitigate hate crimes.
 
@@ -1388,13 +1388,13 @@ All computations are performed using parallel processing to optimize runtime, le
 
 ## Limitations
 
-While the model provides robust insights, it has certain limitations. For instance:
+While the model provides robust views, it has certain limitations. For instance:
 
 - **State-Level Bias**: While random effects capture unobserved heterogeneity, they do not directly explain why certain states have higher or lower hate crime rates. Qualitative research could complement these findings by exploring state-specific factors.
 
 - **Reporting Bias in Hate Crime Data**: Hate crime data may suffer from underreporting or reporting inconsistencies. The data may underreport hate crimes in certain states, introducing bias that the model cannot fully address. Further validation with alternative datasets, such as FBI reports, could improve reliability.
 
-- **Cross-Sectional Analysis**: The dataset represents a single year, limiting insights into temporal trends.
+- **Cross-Sectional Analysis**: The dataset represents a single year, limiting views into temporal trends.
 
 -**Potential Omitted Variables**: The model does not include cultural or political variables that may influence hate crimes. Future models could incorporate additional predictors, such as political polarization or media coverage, to enhance explanatory power.
 
@@ -1402,12 +1402,12 @@ While the model provides robust insights, it has certain limitations. For instan
 
 - **Logistic Regression**: Scaled hate crime data was modeled with a logistic regression. While effective for bounded data, it was less appropriate for continuous hate crime rates.
 
-- **Simple Linear Regression**: Provided insights into individual predictors but lacked the flexibility of random effects modeling.
+- **Simple Linear Regression**: Clarified individual predictors but lacked the flexibility of random effects modeling.
 
 # Additional Results
 
 ## State-Level Effects
-Based on the map (@fig-combined-map), it also underscores the importance of considering regional characteristics when addressing hate crimes. For example, policies in high-crime states might need to be tailored to account for both urban and rural dynamics. It also highlights the need to explore how metro population share influences social cohesion, law enforcement efficiency, and resource allocation, which may indirectly affect hate crime rates. Addressing hate crimes requires nuanced, context-sensitive policy approaches. As Jenness and Grattet[@jenness2001] demonstrate, effective hate crime interventions must move beyond generic strategies to develop targeted responses that account for local social, demographic, and institutional characteristics.
+Based on the map (@fig-combined-map), it also underscores the importance of considering regional characteristics when addressing hate crimes. For example, policies in high-crime states might need to be tailored to account for both urban and rural dynamics. It also highlights the need to explore how metro population share influences social cohesion, law enforcement efficiency, and resource allocation, which may indirectly affect hate crime rates. Addressing hate crimes requires detailed, context-sensitive policy approaches. As Jenness and Grattet[@jenness2001] demonstrate, effective hate crime interventions must move beyond generic strategies to develop targeted responses that account for local social, demographic, and institutional characteristics.
 
 ## Unemployment Rate
 Based on @fig-unemployment-scatter, there are some notable outliers like District of Columbia suggest unique socio-economic or demographic factors that exacerbate hate crime occurrences, independent of unemployment rate alone. This relationship underscores the role of economic stability in fostering or mitigating social cohesion. Regions experiencing high unemployment might benefit from targeted socio-economic policies to address root causes of hate crimes, such as community support programs or economic revitalization strategies.
@@ -1426,13 +1426,13 @@ This whole datasheet is extracted of the questions from **“Datasheets for Data
 **Motivation**
 
 1. *For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled? Please provide a description.*
-    - The dataset was created by FiveThirtyEight to explore the relationship between socioeconomic factors and the prevalence of hate crimes across U.S. states. It includes variables that offer insights into economic, demographic, and social conditions that may influence hate crime occurrences.
+    - The dataset was created by FiveThirtyEight to explore the relationship between socioeconomic factors and the prevalence of hate crimes across U.S. states. It includes variables that clarify economic, demographic, and social conditions that may influence hate crime occurrences.
 2. *Who created the dataset (for example, which team, research group) and on behalf of which entity (for example, company, institution, organization)?*
     - The dataset was collected and published by FiveThirtyEight, a data journalism platform known for high-quality data analysis.
 3. *Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.*
     - The dataset was funded as part of FiveThirtyEight's investigative journalism projects.
 4. *Any other comments?*
-    - This dataset provides a comprehensive overview of hate crimes, contextualized within socioeconomic indicators, making it useful for research, analysis, and policymaking.
+    - This dataset provides a thorough overview of hate crimes, contextualized within socioeconomic indicators, making it useful for research, analysis, and policymaking.
 
 **Composition**
 
@@ -1472,7 +1472,7 @@ This whole datasheet is extracted of the questions from **“Datasheets for Data
 	- Sub-populations are defined by variables such as race, income, and urbanization levels.
 14. *Is it possible to identify individuals (that is, one or more natural persons), either directly or indirectly (that is, in combination with other data) from the dataset? If so, please describe how.*
 	- No individuals are identifiable in this dataset.
-15. *Does the dataset contain data that might be considered sensitive in any way (for example, data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.*
+15. *Does the dataset contain data that might be considered sensitive in any way (for example, data that shows race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)? If so, please provide a description.*
 	- Sensitive data includes race demographics and income levels, requiring ethical considerations during analysis.
 16. *Any other comments?*
 	- No
@@ -1529,7 +1529,7 @@ This whole datasheet is extracted of the questions from **“Datasheets for Data
 	Exploring the influence of socioeconomic factors like inequality and unemployment on crime.
 4. *Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (for example, stereotyping, quality of service issues) or other risks or harms (for example, legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?*
 	- Potential issues include:
-	Aggregated data might mask localized trends or nuances.
+	Aggregated data might mask localized trends or distinctions.
 	Bias in reporting (e.g., differences between SPLC and FBI data) might skew results.
 	Care must be taken to avoid stereotyping regions or groups based on hate crime rates.
 	To mitigate risks, dataset consumers should validate findings with supplementary sources and consider regional or temporal biases in the data.
@@ -1537,7 +1537,7 @@ This whole datasheet is extracted of the questions from **“Datasheets for Data
 	- The dataset should not be used to draw conclusions about individual-level behaviors or characteristics, as it is aggregated at the state level.
 	It should also not be used to make causal inferences without careful statistical validation.
 6. *Any other comments?*
-	- This dataset is a valuable resource for understanding broad trends but requires careful handling to avoid misinterpretation.
+	- This dataset is a meaningful resource for understanding broad trends but requires careful handling to avoid misinterpretation.
 
 **Distribution**
 
@@ -1554,7 +1554,7 @@ This whole datasheet is extracted of the questions from **“Datasheets for Data
 6. *Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.*
 	- No known export controls or regulatory restrictions apply to the dataset.
 7. *Any other comments?*
-	- The dataset is freely accessible and highly valuable for academic and policy-oriented research.
+	- The dataset is freely accessible and highly meaningful for academic and policy-oriented research.
 
 **Maintenance**
 
